@@ -786,11 +786,8 @@ func (m Model) renderStatusBar() string {
 		left = statusBranchStyle.Render(branchStr)
 	}
 
-	// Right side: count + help
+	// Right side: help
 	var rightParts []string
-
-	countStr := fmt.Sprintf("%d/%d ", m.cursor+1, len(m.flatNodes))
-	rightParts = append(rightParts, statusCountStyle.Render(countStr))
 
 	// Help keys
 	helpKeys := statusHelpStyle.Render(" ?:help  c:copy  q:quit ")
