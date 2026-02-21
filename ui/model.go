@@ -386,6 +386,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 				return m, nil
 
+			case "right":
+				m.jumpToNextMatch()
+				return m, nil
+
+			case "left":
+				m.jumpToPrevMatch()
+				return m, nil
+
 			default:
 				// Only add printable characters
 				if msg.Type == tea.KeyRunes {
@@ -456,6 +464,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.ensureVisible()
 
 		case "l", "right":
+			if m.filtered {
+				m.jumpToNextMatch()
+				break
+			}
 			node := m.flatNodes[m.cursor]
 			if node.IsDir && !node.Expanded {
 				node.Expand()
@@ -473,6 +485,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case "h", "left":
+			if m.filtered {
+				m.jumpToPrevMatch()
+				break
+			}
 			node := m.flatNodes[m.cursor]
 			if node.IsDir && node.Expanded {
 				node.Collapse()
@@ -591,6 +607,50 @@ func (m *Model) restoreExpandedState() {
 	m.scrollOff = m.savedScrollOff
 	m.savedExpanded = nil
 	m.ensureVisible()
+}
+
+// jumpToNextMatch moves cursor to the next node that has fuzzy match highlights
+func (m *Model) jumpToNextMatch() {
+	if m.searchMatchIndices == nil {
+		return
+	}
+	for i := m.cursor + 1; i < len(m.flatNodes); i++ {
+		if _, ok := m.searchMatchIndices[m.flatNodes[i]]; ok {
+			m.cursor = i
+			m.ensureVisible()
+			return
+		}
+	}
+	// Wrap around
+	for i := 0; i < m.cursor; i++ {
+		if _, ok := m.searchMatchIndices[m.flatNodes[i]]; ok {
+			m.cursor = i
+			m.ensureVisible()
+			return
+		}
+	}
+}
+
+// jumpToPrevMatch moves cursor to the previous node that has fuzzy match highlights
+func (m *Model) jumpToPrevMatch() {
+	if m.searchMatchIndices == nil {
+		return
+	}
+	for i := m.cursor - 1; i >= 0; i-- {
+		if _, ok := m.searchMatchIndices[m.flatNodes[i]]; ok {
+			m.cursor = i
+			m.ensureVisible()
+			return
+		}
+	}
+	// Wrap around
+	for i := len(m.flatNodes) - 1; i > m.cursor; i-- {
+		if _, ok := m.searchMatchIndices[m.flatNodes[i]]; ok {
+			m.cursor = i
+			m.ensureVisible()
+			return
+		}
+	}
 }
 
 func (m *Model) expandAll(node *tree.Node) {
