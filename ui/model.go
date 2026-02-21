@@ -150,9 +150,15 @@ type Model struct {
 
 	// Search
 	searching    bool
+	filtered     bool // true when search confirmed and showing filtered results
 	searchQuery  string
 	searchNodes  []*tree.Node // filtered flat list preserving hierarchy
 	searchMatchIndices map[*tree.Node][]int // char indices that matched for highlighting
+
+	// Saved state before search
+	savedExpanded map[*tree.Node]bool
+	savedCursor   int
+	savedScrollOff int
 }
 
 // New creates a new Model
@@ -326,21 +332,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			switch msg.String() {
 			case "esc":
 				m.searching = false
+				m.filtered = false
 				m.searchQuery = ""
 				m.searchNodes = nil
 				m.searchMatchIndices = nil
-				m.flatNodes = flattenSkipRoot(m.root)
-				if m.cursor >= len(m.flatNodes) {
-					m.cursor = len(m.flatNodes) - 1
-				}
-				if m.cursor < 0 {
-					m.cursor = 0
-				}
-				m.scrollOff = 0
+				m.restoreExpandedState()
 				return m, nil
 
 			case "enter":
 				m.searching = false
+				m.filtered = true
 				// Keep filtered results as current view
 				if m.searchNodes != nil {
 					m.flatNodes = m.searchNodes
@@ -403,6 +404,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		switch msg.String() {
+		case "esc":
+			if m.filtered {
+				m.filtered = false
+				m.searchQuery = ""
+				m.searchNodes = nil
+				m.searchMatchIndices = nil
+				m.restoreExpandedState()
+			}
+			return m, nil
+
 		case "q", "ctrl+c":
 			return m, tea.Quit
 
@@ -530,12 +541,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case "/":
+			m.saveExpandedState()
 			m.searching = true
+			m.filtered = false
 			m.searchQuery = ""
 			m.searchNodes = nil
 			m.searchMatchIndices = nil
 			// Expand all for search
 			m.expandAll(m.root)
+			m.flatNodes = flattenSkipRoot(m.root)
 			m.cursor = 0
 			m.scrollOff = 0
 
@@ -545,6 +559,38 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	return m, nil
+}
+
+func (m *Model) saveExpandedState() {
+	m.savedExpanded = make(map[*tree.Node]bool)
+	all := tree.FlattenAll(m.root)
+	for _, n := range all {
+		if n.IsDir {
+			m.savedExpanded[n] = n.Expanded
+		}
+	}
+	m.savedCursor = m.cursor
+	m.savedScrollOff = m.scrollOff
+}
+
+func (m *Model) restoreExpandedState() {
+	if m.savedExpanded == nil {
+		return
+	}
+	for node, expanded := range m.savedExpanded {
+		node.Expanded = expanded
+	}
+	m.flatNodes = flattenSkipRoot(m.root)
+	m.cursor = m.savedCursor
+	if m.cursor >= len(m.flatNodes) {
+		m.cursor = len(m.flatNodes) - 1
+	}
+	if m.cursor < 0 {
+		m.cursor = 0
+	}
+	m.scrollOff = m.savedScrollOff
+	m.savedExpanded = nil
+	m.ensureVisible()
 }
 
 func (m *Model) expandAll(node *tree.Node) {
