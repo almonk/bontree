@@ -672,8 +672,8 @@ func (m *Model) collapseAll(node *tree.Node) {
 }
 
 func (m *Model) viewportHeight() int {
-	// height minus: title(1) + status bar(1) + search bar(1 if searching)
-	h := m.height - 2
+	// height minus: status bar(1) + search bar(1 if searching)
+	h := m.height - 1
 	if m.searching {
 		h-- // search input takes a line
 	}
@@ -703,12 +703,6 @@ func (m Model) View() string {
 	}
 
 	var b strings.Builder
-
-	// Title
-	titleIcon := rootIconStyle.Render("\uf07c")
-	title := titleStyle.Render(fmt.Sprintf("%s %s", titleIcon, m.root.Name))
-	b.WriteString(title)
-	b.WriteString("\n")
 
 	// Tree content
 	viewH := m.viewportHeight()
