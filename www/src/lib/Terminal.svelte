@@ -8,7 +8,7 @@
   };
 
   let containerEl: HTMLDivElement;
-  let reservedHeightPx = 512;
+  let reservedHeightPx = 509;
 
   function clamp(value: number, min: number, max: number): number {
     return Math.max(min, Math.min(value, max));
@@ -18,16 +18,21 @@
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
     const isMobile = viewportWidth <= 640;
+    const isDesktop = viewportWidth >= 901;
     const measuredWidth = Math.floor(container.getBoundingClientRect().width);
     const horizontalPadding = isMobile ? 6 : 4;
     const availableWidth = Math.max(280, (measuredWidth || viewportWidth) - horizontalPadding);
-    const fontSize = isMobile ? 12 : 14;
+    const fontSize = 14;
     const cellWidth = isMobile ? 7.05 : 8.15;
     const cols = clamp(Math.floor((availableWidth - 4) / cellWidth), 32, 110);
 
     const chromeHeight = isMobile ? 260 : 230;
     const cellHeight = isMobile ? 14 : 16;
-    const rows = clamp(Math.floor((viewportHeight - chromeHeight) / cellHeight), 16, 28);
+    const desktopInnerHeight = Math.max(120, reservedHeightPx - 10);
+    const rows = isDesktop
+      // Keep one row of headroom so the bottom status line is never clipped.
+      ? clamp(Math.floor(desktopInnerHeight / cellHeight) - 1, 8, 28)
+      : clamp(Math.floor((viewportHeight - chromeHeight) / cellHeight), 16, 28);
 
     return { cols, rows, fontSize };
   }
@@ -201,7 +206,7 @@
   });
 </script>
 
-<div class="terminal-wrapper" style={`min-height: ${reservedHeightPx}px`}>
+<div class="terminal-wrapper" style={`--desktop-terminal-height: ${reservedHeightPx}px`}>
   <div class="terminal" bind:this={containerEl}></div>
 </div>
 
@@ -211,6 +216,12 @@
     border-radius: 8px;
     overflow: hidden;
     border: 1px solid #414868;
+  }
+
+  @media (min-width: 901px) {
+    .terminal-wrapper {
+      height: var(--desktop-terminal-height);
+    }
   }
 
   .terminal {
