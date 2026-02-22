@@ -86,5 +86,5 @@ var (
 				Bold(true)
 
 	searchInputStyle  = statusBase.Foreground(colorFg).PaddingLeft(1)
-	searchPromptStyle = statusBase.Foreground(colorBlue).Bold(true).PaddingLeft(1)
+	searchPromptStyle = statusBase.Foreground(colorGutter).PaddingLeft(1)
 )
