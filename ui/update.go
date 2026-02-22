@@ -88,14 +88,13 @@ func (m Model) updateMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 func (m Model) updateSearchMode(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "esc":
+		// First escape confirms the search (same as enter)
 		m.searching = false
-		m.filtered = false
-		m.flatSearch = false
-		m.searchQuery = ""
-		m.searchNodes = nil
-		m.searchMatchIndices = nil
-		m.searchPathIndices = nil
-		m.restoreExpandedState()
+		m.filtered = true
+		if m.searchNodes != nil {
+			m.flatNodes = m.searchNodes
+		}
+		m.clampCursor()
 
 	case "enter":
 		m.searching = false
