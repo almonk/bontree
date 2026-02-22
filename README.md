@@ -69,13 +69,6 @@ Bontree uses a Ghostty-style config file at `~/.config/bontree/config` (respects
 
 The syntax is `key = value`. Comments start with `#` and must be on their own line. Blank lines are ignored. A fully commented example is available in [`config.example`](config.example).
 
-### Settings
-
-| Key | Values | Default | Description |
-|-----|--------|---------|-------------|
-| `show-hidden` | `true` / `false` | `false` | Show hidden files (dotfiles) on startup |
-| `theme` | theme name | *(unset)* | Ghostty-compatible color theme (see [Theming](#theming)) |
-
 ### Custom keybindings
 
 Keybindings are configured with `keybind = <key>=<action>`. Your bindings are merged with the defaults — you only need to specify what you want to change.
@@ -118,6 +111,13 @@ Letters and symbols are used as-is (`a`, `G`, `/`, `?`, `.`). Special keys: `up`
 | `clear_filter` | Clear active search filter |
 
 Search mode also supports: `search_confirm`, `search_cancel`, `search_backspace`, `search_next_match`, `search_prev_match`.
+
+### Settings
+
+| Key | Values | Default | Description |
+|-----|--------|---------|-------------|
+| `show-hidden` | `true` / `false` | `false` | Show hidden files (dotfiles) on startup |
+| `theme` | theme name | *(unset)* | Ghostty-compatible color theme (see [Theming](#theming)) |
 
 ### Theming
 
