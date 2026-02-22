@@ -17,7 +17,7 @@ var (
 	colorOrange lipgloss.TerminalColor = lipgloss.Color("208") // 256-color; no ANSI equivalent
 
 	// Adaptive text colors
-	colorFg      lipgloss.TerminalColor = lipgloss.AdaptiveColor{Light: "0", Dark: "15"}
+	colorFg      lipgloss.TerminalColor = lipgloss.AdaptiveColor{Light: "0", Dark: "7"}
 	colorFgDim   lipgloss.TerminalColor = lipgloss.AdaptiveColor{Light: "8", Dark: "7"}
 	colorComment lipgloss.TerminalColor = lipgloss.Color("8")
 	colorGutter  lipgloss.TerminalColor = lipgloss.AdaptiveColor{Light: "248", Dark: "239"}
