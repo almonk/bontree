@@ -61,7 +61,10 @@ func (m Model) View() string {
 }
 
 func (m Model) renderStatusBar() string {
-	w := max(m.width, 80)
+	w := m.width
+	if w < 20 {
+		w = 20
+	}
 	chevron := "\ue0b0" // 
 
 	// Determine mode label and color
@@ -88,6 +91,11 @@ func (m Model) renderStatusBar() string {
 	modeChevronStyle := lipgloss.NewStyle().
 		Foreground(modeBg)
 
+	var right string
+	if w >= 60 {
+		right = statusHelpStyle.Render(" ?:help  c:copy  q:quit ")
+	}
+
 	var left string
 
 	if m.flashMsg != "" {
@@ -98,7 +106,17 @@ func (m Model) renderStatusBar() string {
 		// Branch segment
 		branchText := ""
 		if m.gitBranch != "" {
-			branchText = fmt.Sprintf(" \ue725 %s ", m.gitBranch)
+			// Reserve space for mode segment (~10), chevrons (~2), and right side if visible
+			reserved := 15 + lipgloss.Width(right)
+			branchMax := w - reserved
+			if branchMax < 10 {
+				branchMax = 10
+			}
+			branch := m.gitBranch
+			if runeLen(branch) > branchMax {
+				branch, _ = middleTruncate(branch, branchMax, nil)
+			}
+			branchText = fmt.Sprintf(" \ue725 %s ", branch)
 		}
 		branchBg := lipgloss.AdaptiveColor{Light: "252", Dark: "237"}
 
@@ -120,8 +138,6 @@ func (m Model) renderStatusBar() string {
 			left += lipgloss.NewStyle().Foreground(modeBg).Background(colorBg).Render(chevron)
 		}
 	}
-
-	right := statusHelpStyle.Render(" ?:help  c:copy  q:quit ")
 
 	padding := w - lipgloss.Width(left) - lipgloss.Width(right)
 	if padding < 0 {
@@ -149,7 +165,11 @@ func (m Model) renderNode(node *tree.Node, selected bool, maxWidth int) string {
 	// Layout: " " + prefix + icon + " " + name [+ "  " + dirPath]
 	prefixWidth := lipgloss.Width(prefix)
 	iconWidth := lipgloss.Width(icon)
-	fixedWidth := 1 + prefixWidth + iconWidth + 1
+	thinSpace := 0
+	if prefixWidth > 0 {
+		thinSpace = 1 // \u2009 between prefix and icon
+	}
+	fixedWidth := 1 + prefixWidth + thinSpace + iconWidth + 1
 	available := maxWidth - fixedWidth
 	if available < 4 {
 		available = 4
