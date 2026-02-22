@@ -20,19 +20,19 @@ import (
 // ── Colors (Tokyo Night) ──
 
 var (
-	colorBlue      lipgloss.TerminalColor = lipgloss.Color("#6d9df1") // palette 12
-	colorGreen     lipgloss.TerminalColor = lipgloss.Color("#67ff4f") // palette 10
-	colorRed       lipgloss.TerminalColor = lipgloss.Color("#fb7172") // palette 9
-	colorYellow    lipgloss.TerminalColor = lipgloss.Color("#ffff00") // palette 11
-	colorPurple    lipgloss.TerminalColor = lipgloss.Color("#fb82ff") // palette 13
-	colorCyan      lipgloss.TerminalColor = lipgloss.Color("#60d3d1") // palette 14
-	colorOrange    lipgloss.TerminalColor = lipgloss.Color("#c2c300") // palette 3
-	colorFg        lipgloss.TerminalColor = lipgloss.Color("#adadad") // foreground
-	colorFgDim     lipgloss.TerminalColor = lipgloss.Color("#adadad") // palette 7
-	colorComment   lipgloss.TerminalColor = lipgloss.Color("#555555") // palette 8
-	colorGutter    lipgloss.TerminalColor = lipgloss.Color("#555555") // palette 8
-	colorBg        lipgloss.TerminalColor = lipgloss.Color("#202020") // background
-	colorSelection lipgloss.TerminalColor = lipgloss.Color("#1a3272") // selection-background
+	colorBlue      lipgloss.TerminalColor = lipgloss.Color("#7aa2f7")
+	colorGreen     lipgloss.TerminalColor = lipgloss.Color("#9ece6a")
+	colorRed       lipgloss.TerminalColor = lipgloss.Color("#f7768e")
+	colorYellow    lipgloss.TerminalColor = lipgloss.Color("#e0af68")
+	colorPurple    lipgloss.TerminalColor = lipgloss.Color("#bb9af7")
+	colorCyan      lipgloss.TerminalColor = lipgloss.Color("#7dcfff")
+	colorOrange    lipgloss.TerminalColor = lipgloss.Color("#ff9e64")
+	colorFg        lipgloss.TerminalColor = lipgloss.Color("#c0caf5")
+	colorFgDim     lipgloss.TerminalColor = lipgloss.Color("#a9b1d6")
+	colorComment   lipgloss.TerminalColor = lipgloss.Color("#565f89")
+	colorGutter    lipgloss.TerminalColor = lipgloss.Color("#565f89")
+	colorBg        lipgloss.TerminalColor = lipgloss.Color("#1a1b26")
+	colorSelection lipgloss.TerminalColor = lipgloss.Color("#33467c")
 )
 
 // ── Styles ──
@@ -72,7 +72,7 @@ func initStyles() {
 	statusFlashStyle = statusBase.Foreground(colorGreen).Bold(true).PaddingLeft(1)
 	statusHelpStyle = statusBase.Foreground(colorGutter)
 	searchInputStyle = statusBase.Foreground(colorFg).PaddingLeft(1)
-	searchPromptStyle = statusBase.Foreground(colorGutter).PaddingLeft(1)
+	searchPromptStyle = statusBase.Foreground(colorGutter).PaddingLeft(1).PaddingRight(1)
 }
 
 // ── Git status ──
@@ -357,7 +357,7 @@ func (m *model) view() string {
 	}
 	if m.searching {
 		b.WriteString("\n")
-		prompt := "\uf002"
+		prompt := "\uf002 "
 		searchLine := searchPromptStyle.Render(prompt) + searchInputStyle.Render(m.searchQuery+"█")
 		if sw := lipgloss.Width(searchLine); sw < m.width {
 			searchLine += statusBase.Render(strings.Repeat(" ", m.width-sw))
@@ -418,7 +418,7 @@ func (m *model) renderStatusBar() string {
 			}
 			branchText = fmt.Sprintf(" \ue725 %s ", branch)
 		}
-		branchBg := lipgloss.Color("237")
+			branchBg := colorSelection
 		branchStyle := lipgloss.NewStyle().Background(branchBg).Foreground(colorBlue).Bold(true)
 		branchChevronStyle := lipgloss.NewStyle().Foreground(branchBg).Background(colorBg)
 
@@ -452,11 +452,7 @@ func (m *model) renderNode(node *tree.Node, selected bool, maxWidth int) string 
 
 	prefixWidth := lipgloss.Width(prefix)
 	iconWidth := lipgloss.Width(icon)
-	thinSpace := 0
-	if prefixWidth > 0 {
-		thinSpace = 1
-	}
-	fixedWidth := 1 + prefixWidth + thinSpace + iconWidth + 1
+	fixedWidth := 1 + prefixWidth + iconWidth + 1
 	available := maxWidth - fixedWidth
 	if available < 4 {
 		available = 4
@@ -495,7 +491,7 @@ func (m *model) renderNode(node *tree.Node, selected bool, maxWidth int) string 
 		var parts []string
 		parts = append(parts, selectedStyle.Render(" "))
 		if prefix != "" {
-			parts = append(parts, treeLineSelectedStyle.Render(prefix)+selectedStyle.Render("\u2009"))
+			parts = append(parts, treeLineSelectedStyle.Render(prefix))
 		}
 		parts = append(parts, selectedStyle.Render(icon+" "))
 		parts = append(parts, renderNameHighlighted(displayName, nameIndices, selectedStyle, matchHighlightSelectedStyle))
@@ -528,7 +524,7 @@ func (m *model) renderNode(node *tree.Node, selected bool, maxWidth int) string 
 	var parts []string
 	parts = append(parts, " ")
 	if prefix != "" {
-		parts = append(parts, treeLineStyle.Render(prefix)+"\u2009")
+		parts = append(parts, treeLineStyle.Render(prefix))
 	}
 
 	iconStyle, nameStyle := m.gitNodeStyles(node)
