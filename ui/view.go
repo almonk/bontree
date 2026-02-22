@@ -43,10 +43,7 @@ func (m Model) View() string {
 	// Search input (above status bar)
 	if m.searching {
 		b.WriteString("\n")
-		prompt := "/"
-		if m.flatSearch {
-			prompt = "find:"
-		}
+		prompt := "\uf002"
 		searchLine := searchPromptStyle.Render(prompt) + searchInputStyle.Render(m.searchQuery+"█")
 		if sw := lipgloss.Width(searchLine); sw < m.width {
 			searchLine += statusBase.Render(strings.Repeat(" ", m.width-sw))
