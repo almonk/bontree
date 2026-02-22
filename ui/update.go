@@ -216,7 +216,7 @@ func (m Model) updateNormalMode(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		if err := clipboard.WriteAll(relPath); err != nil {
 			return m, flash(&m, fmt.Sprintf("✗ Failed to copy: %s", err))
 		}
-		return m, flash(&m, fmt.Sprintf("✓ Copied: %s", relPath))
+		return m, flash(&m, fmt.Sprintf("✓ Copied path: %s", relPath))
 
 	case "E":
 		m.setExpandAll(m.root, true)
