@@ -145,9 +145,18 @@ func (m Model) renderNode(node *tree.Node, selected bool, maxWidth int) string {
 		}
 		parts = append(parts, selectedStyle.Render(icon+" "))
 		parts = append(parts, m.renderNameHighlighted(displayName, nameIndices, selectedStyle, matchHighlightSelectedStyle))
+
 		if displayDirPath != "" {
-			parts = append(parts, flatPathSelectedStyle.Render("  "))
-			parts = append(parts, m.renderNameHighlighted(displayDirPath, pathIndices, flatPathSelectedStyle, matchHighlightSelectedStyle))
+			// Right-align the dir path
+			leftWidth := lipgloss.Width(strings.Join(parts, ""))
+			dirRendered := m.renderNameHighlighted(displayDirPath, pathIndices, flatPathSelectedStyle, matchHighlightSelectedStyle)
+			dirWidth := lipgloss.Width(dirRendered)
+			gap := maxWidth - leftWidth - dirWidth
+			if gap < 2 {
+				gap = 2
+			}
+			parts = append(parts, selectedStyle.Render(strings.Repeat(" ", gap)))
+			parts = append(parts, dirRendered)
 		}
 
 		if plainLen := lipgloss.Width(strings.Join(parts, "")); plainLen < maxWidth {
@@ -165,9 +174,18 @@ func (m Model) renderNode(node *tree.Node, selected bool, maxWidth int) string {
 	iconStyle, nameStyle := m.gitNodeStyles(node)
 	parts = append(parts, iconStyle.Render(icon)+" ")
 	parts = append(parts, m.renderNameHighlighted(displayName, nameIndices, nameStyle, matchHighlightStyle))
+
 	if displayDirPath != "" {
-		parts = append(parts, flatPathStyle.Render("  "))
-		parts = append(parts, m.renderNameHighlighted(displayDirPath, pathIndices, flatPathStyle, matchHighlightStyle))
+		// Right-align the dir path
+		leftWidth := lipgloss.Width(strings.Join(parts, ""))
+		dirRendered := m.renderNameHighlighted(displayDirPath, pathIndices, flatPathStyle, matchHighlightStyle)
+		dirWidth := lipgloss.Width(dirRendered)
+		gap := maxWidth - leftWidth - dirWidth
+		if gap < 2 {
+			gap = 2
+		}
+		parts = append(parts, strings.Repeat(" ", gap))
+		parts = append(parts, dirRendered)
 	}
 
 	return strings.Join(parts, "")
