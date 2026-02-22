@@ -289,9 +289,23 @@ func (m Model) renderNameHighlighted(name string, matchIndices []int, baseStyle,
 		return baseStyle.Render(name)
 	}
 
-	matchSet := make(map[int]bool, len(matchIndices))
-	for _, idx := range matchIndices {
-		matchSet[idx] = true
+	// Build set of indices that are part of consecutive runs of 2+.
+	// Single isolated matches are not highlighted to reduce visual noise.
+	sorted := make([]int, len(matchIndices))
+	copy(sorted, matchIndices)
+	sort.Ints(sorted)
+
+	matchSet := make(map[int]bool, len(sorted))
+	for i, idx := range sorted {
+		hasPrev := i > 0 && sorted[i-1] == idx-1
+		hasNext := i < len(sorted)-1 && sorted[i+1] == idx+1
+		if hasPrev || hasNext {
+			matchSet[idx] = true
+		}
+	}
+
+	if len(matchSet) == 0 {
+		return baseStyle.Render(name)
 	}
 
 	var result strings.Builder

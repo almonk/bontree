@@ -15,6 +15,12 @@ func (ns nodeSource) String(i int) string {
 }
 func (ns nodeSource) Len() int { return len(ns) }
 
+// nodeNameSource implements fuzzy.Source for tree nodes, matching against name only
+type nodeNameSource []*tree.Node
+
+func (ns nodeNameSource) String(i int) string { return ns[i].Name }
+func (ns nodeNameSource) Len() int            { return len(ns) }
+
 // splitMatchIndices splits full-path match indices into name indices and dir-path indices.
 // path is "dir/name", nameOffset is len(path) - len(name).
 func splitMatchIndices(indices []int, path, name string) (nameIndices, pathIndices []int) {
@@ -89,22 +95,14 @@ func (m *Model) updateSearch() {
 	}
 
 	allNodes := tree.FlattenAll(m.root)
-	results := fuzzy.FindFrom(m.searchQuery, nodeSource(allNodes))
+	// Tree mode: match against node names only for stricter results
+	results := fuzzy.FindFrom(m.searchQuery, nodeNameSource(allNodes))
 
 	nameMap := make(map[*tree.Node][]int)
 	matchSet := make(map[*tree.Node]bool)
 	for _, r := range results {
 		node := allNodes[r.Index]
-		path := strings.TrimPrefix(node.Path, "./")
-		// Prefer a direct fuzzy match against the node name for highlights;
-		// fall back to extracting name indices from the full-path match.
-		var nameIdx []int
-		if nr := fuzzy.Find(m.searchQuery, []string{node.Name}); len(nr) > 0 {
-			nameIdx = nr[0].MatchedIndexes
-		} else {
-			nameIdx, _ = splitMatchIndices(r.MatchedIndexes, path, node.Name)
-		}
-		nameMap[node] = nameIdx
+		nameMap[node] = r.MatchedIndexes
 		matchSet[node] = true
 		for ancestor := node.Parent; ancestor != nil && !matchSet[ancestor]; ancestor = ancestor.Parent {
 			matchSet[ancestor] = true
@@ -142,7 +140,23 @@ func (m *Model) updateFlatSearch() {
 	for _, r := range results {
 		node := allNodes[r.Index]
 		path := strings.TrimPrefix(node.Path, "./")
-		nameIdx, pathIdx := splitMatchIndices(r.MatchedIndexes, path, node.Name)
+
+		// Prefer direct fuzzy match against name/path for better highlights;
+		// fall back to splitting full-path match indices.
+		var nameIdx, pathIdx []int
+		if nr := fuzzy.Find(m.searchQuery, []string{node.Name}); len(nr) > 0 {
+			nameIdx = nr[0].MatchedIndexes
+		} else {
+			nameIdx, _ = splitMatchIndices(r.MatchedIndexes, path, node.Name)
+		}
+		if node.Parent != nil && node.Parent != m.root {
+			dirPath := strings.TrimPrefix(node.Parent.Path, "./")
+			if pr := fuzzy.Find(m.searchQuery, []string{dirPath}); len(pr) > 0 {
+				pathIdx = pr[0].MatchedIndexes
+			} else {
+				_, pathIdx = splitMatchIndices(r.MatchedIndexes, path, node.Name)
+			}
+		}
 		nameMap[node] = nameIdx
 		pathMap[node] = pathIdx
 		if node.IsDir {
