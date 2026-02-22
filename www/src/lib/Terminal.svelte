@@ -8,7 +8,7 @@
   };
 
   let containerEl: HTMLDivElement;
-  let reservedHeightPx = 509;
+  let reservedHeightPx = 481;
 
   function clamp(value: number, min: number, max: number): number {
     return Math.max(min, Math.min(value, max));
@@ -22,8 +22,10 @@
     const measuredWidth = Math.floor(container.getBoundingClientRect().width);
     const horizontalPadding = isMobile ? 6 : 4;
     const availableWidth = Math.max(280, (measuredWidth || viewportWidth) - horizontalPadding);
-    const fontSize = 14;
-    const cellWidth = isMobile ? 7.05 : 8.15;
+    const fontSize = 13;
+    // Keep measured cols in sync with configured font size so rows fully span
+    // the terminal surface (including selection background fill).
+    const cellWidth = isMobile ? fontSize * 0.504 : fontSize * 0.582;
     const cols = clamp(Math.floor((availableWidth - 4) / cellWidth), 32, 110);
 
     const chromeHeight = isMobile ? 260 : 230;
