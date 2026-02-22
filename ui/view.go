@@ -191,7 +191,7 @@ func (m Model) renderNode(node *tree.Node, selected bool, maxWidth int) string {
 		var parts []string
 		parts = append(parts, selectedStyle.Render(" "))
 		if prefix != "" {
-			parts = append(parts, treeLineSelectedStyle.Render(prefix))
+			parts = append(parts, treeLineSelectedStyle.Render(prefix)+selectedStyle.Render("\u2009"))
 		}
 		parts = append(parts, selectedStyle.Render(icon+" "))
 		parts = append(parts, m.renderNameHighlighted(displayName, nameIndices, selectedStyle, matchHighlightSelectedStyle))
@@ -218,7 +218,7 @@ func (m Model) renderNode(node *tree.Node, selected bool, maxWidth int) string {
 	var parts []string
 	parts = append(parts, " ")
 	if prefix != "" {
-		parts = append(parts, treeLineStyle.Render(prefix))
+		parts = append(parts, treeLineStyle.Render(prefix)+"\u2009")
 	}
 
 	iconStyle, nameStyle := m.gitNodeStyles(node)
