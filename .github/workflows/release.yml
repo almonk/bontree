@@ -1,0 +1,68 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+
+      - name: Determine next version
+        id: version
+        run: |
+          # Get the latest tag, default to v0.0.0 if none exists
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "Latest tag: $LATEST_TAG"
+
+          # Strip the 'v' prefix and split into parts
+          VERSION="${LATEST_TAG#v}"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+
+          # Bump patch version
+          PATCH=$((PATCH + 1))
+          NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+          echo "New version: $NEW_VERSION"
+          echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Build binaries
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          mkdir -p dist
+
+          # macOS ARM (Apple Silicon)
+          GOOS=darwin GOARCH=arm64 go build -ldflags "-X main.Version=$VERSION" -o dist/bontree-darwin-arm64 .
+
+          # macOS Intel
+          GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.Version=$VERSION" -o dist/bontree-darwin-amd64 .
+
+          # Linux AMD64
+          GOOS=linux GOARCH=amd64 go build -ldflags "-X main.Version=$VERSION" -o dist/bontree-linux-amd64 .
+
+          # Linux ARM64
+          GOOS=linux GOARCH=arm64 go build -ldflags "-X main.Version=$VERSION" -o dist/bontree-linux-arm64 .
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          git tag "$VERSION"
+          git push origin "$VERSION"
+
+          gh release create "$VERSION" dist/* \
+            --title "$VERSION" \
+            --generate-notes

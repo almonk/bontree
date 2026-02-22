@@ -8,7 +8,15 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+// Version is set at build time via -ldflags
+var Version = "dev"
+
 func main() {
+	if len(os.Args) > 1 && (os.Args[1] == "-v" || os.Args[1] == "--version") {
+		fmt.Printf("bontree %s\n", Version)
+		os.Exit(0)
+	}
+
 	path := "."
 	if len(os.Args) > 1 {
 		path = os.Args[1]
