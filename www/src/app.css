@@ -1,0 +1,71 @@
+@font-face {
+  font-family: 'Maple Mono NF';
+  src: url('/fonts/MapleMono-NF-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Maple Mono NF';
+  src: url('/fonts/MapleMono-NF-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Maple Mono NF';
+  src: url('/fonts/MapleMono-NF-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+:root {
+  --bg: #1a1b26;
+  --bg-lighter: #24283b;
+  --bg-card: #24283b;
+  --fg: #c0caf5;
+  --fg-dim: #a9b1d6;
+  --fg-muted: #565f89;
+  --accent: #7aa2f7;
+  --green: #9ece6a;
+  --cyan: #7dcfff;
+  --yellow: #e0af68;
+  --border: #414868;
+  --selection: #33467c;
+  --radius: 8px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Maple Mono NF', 'SF Mono', 'Fira Code', monospace;
+  font-size: 14px;
+  background: var(--bg);
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  -webkit-user-select: none;
+  user-select: none;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+}
+
+@media (max-width: 640px) {
+  body {
+    align-items: flex-start;
+    padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right))
+      max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+  }
+}
