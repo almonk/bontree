@@ -2,7 +2,9 @@
 
 A file explorer to pair with your favourite agent.
 
-A fast, interactive terminal file explorer with fuzzy search, git integration, and Nerd Font icons. Built with Go and [Bubble Tea](https://github.com/charmbracelet/bubbletea).
+Bontree is a fast, interactive terminal file explorer with fuzzy search, git integration, and Nerd Font icons. Built with Go and [Bubble Tea](https://github.com/charmbracelet/bubbletea).
+
+Ideal for making sense of changes from coding agents — see git status at a glance to understand what's been modified — and for quickly finding files to copy paths into prompts.
 
 ## Features
 
