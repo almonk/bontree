@@ -96,7 +96,14 @@ func (m *Model) updateSearch() {
 	for _, r := range results {
 		node := allNodes[r.Index]
 		path := strings.TrimPrefix(node.Path, "./")
-		nameIdx, _ := splitMatchIndices(r.MatchedIndexes, path, node.Name)
+		// Prefer a direct fuzzy match against the node name for highlights;
+		// fall back to extracting name indices from the full-path match.
+		var nameIdx []int
+		if nr := fuzzy.Find(m.searchQuery, []string{node.Name}); len(nr) > 0 {
+			nameIdx = nr[0].MatchedIndexes
+		} else {
+			nameIdx, _ = splitMatchIndices(r.MatchedIndexes, path, node.Name)
+		}
 		nameMap[node] = nameIdx
 		matchSet[node] = true
 		for ancestor := node.Parent; ancestor != nil && !matchSet[ancestor]; ancestor = ancestor.Parent {
