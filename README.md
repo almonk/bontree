@@ -1,5 +1,7 @@
 # bontree
 
+A file explorer for your agents.
+
 A fast, interactive terminal file explorer with fuzzy search, git integration, and Nerd Font icons. Built with Go and [Bubble Tea](https://github.com/charmbracelet/bubbletea).
 
 ## Features
