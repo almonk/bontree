@@ -2,9 +2,9 @@
   import { onMount } from 'svelte';
 
   const THEME = {
-    bg:        '#1a1b26',
-    fg:        '#c0caf5',
-    selection: '#33467c',
+    bg:        '#202020',
+    fg:        '#adadad',
+    selection: '#1a3272',
   };
 
   let containerEl: HTMLDivElement;
@@ -151,56 +151,18 @@
 </script>
 
 <div class="terminal-wrapper">
-  <div class="terminal-chrome">
-    <div class="terminal-dots">
-      <span class="dot red"></span>
-      <span class="dot yellow"></span>
-      <span class="dot green"></span>
-    </div>
-    <span class="terminal-title">bontree ~/my-project</span>
-  </div>
   <div class="terminal" bind:this={containerEl}></div>
 </div>
 
 <style>
   .terminal-wrapper {
-    border-radius: 12px;
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--border);
-  }
-
-  .terminal-chrome {
-    background: #16161e;
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .terminal-dots {
-    display: flex;
-    gap: 8px;
-  }
-
-  .dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-  }
-  .dot.red    { background: #f7768e; }
-  .dot.yellow { background: #e0af68; }
-  .dot.green  { background: #9ece6a; }
-
-  .terminal-title {
-    color: var(--fg-muted);
-    font-size: 0.8rem;
-    flex: 1;
-    text-align: center;
-    margin-right: 52px;
+    border: 1px solid #393939;
   }
 
   .terminal {
-    background: #1a1b26;
+    background: #202020;
     padding: 4px 0;
     user-select: none;
     -webkit-user-select: none;

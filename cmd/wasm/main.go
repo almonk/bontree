@@ -20,19 +20,19 @@ import (
 // ── Colors (Tokyo Night) ──
 
 var (
-	colorBlue      lipgloss.TerminalColor = lipgloss.Color("#7aa2f7")
-	colorGreen     lipgloss.TerminalColor = lipgloss.Color("#9ece6a")
-	colorRed       lipgloss.TerminalColor = lipgloss.Color("#f7768e")
-	colorYellow    lipgloss.TerminalColor = lipgloss.Color("#e0af68")
-	colorPurple    lipgloss.TerminalColor = lipgloss.Color("#bb9af7")
-	colorCyan      lipgloss.TerminalColor = lipgloss.Color("#7dcfff")
-	colorOrange    lipgloss.TerminalColor = lipgloss.Color("#ff9e64")
-	colorFg        lipgloss.TerminalColor = lipgloss.Color("#c0caf5")
-	colorFgDim     lipgloss.TerminalColor = lipgloss.Color("#9aa5ce")
-	colorComment   lipgloss.TerminalColor = lipgloss.Color("#565f89")
-	colorGutter    lipgloss.TerminalColor = lipgloss.Color("#3b4261")
-	colorBg        lipgloss.TerminalColor = lipgloss.Color("#1f2335")
-	colorSelection lipgloss.TerminalColor = lipgloss.Color("#33467c")
+	colorBlue      lipgloss.TerminalColor = lipgloss.Color("#6d9df1") // palette 12
+	colorGreen     lipgloss.TerminalColor = lipgloss.Color("#67ff4f") // palette 10
+	colorRed       lipgloss.TerminalColor = lipgloss.Color("#fb7172") // palette 9
+	colorYellow    lipgloss.TerminalColor = lipgloss.Color("#ffff00") // palette 11
+	colorPurple    lipgloss.TerminalColor = lipgloss.Color("#fb82ff") // palette 13
+	colorCyan      lipgloss.TerminalColor = lipgloss.Color("#60d3d1") // palette 14
+	colorOrange    lipgloss.TerminalColor = lipgloss.Color("#c2c300") // palette 3
+	colorFg        lipgloss.TerminalColor = lipgloss.Color("#adadad") // foreground
+	colorFgDim     lipgloss.TerminalColor = lipgloss.Color("#adadad") // palette 7
+	colorComment   lipgloss.TerminalColor = lipgloss.Color("#555555") // palette 8
+	colorGutter    lipgloss.TerminalColor = lipgloss.Color("#555555") // palette 8
+	colorBg        lipgloss.TerminalColor = lipgloss.Color("#202020") // background
+	colorSelection lipgloss.TerminalColor = lipgloss.Color("#1a3272") // selection-background
 )
 
 // ── Styles ──

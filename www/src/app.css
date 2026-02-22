@@ -15,16 +15,16 @@
 }
 
 :root {
-  --bg: #1a1b26;
-  --bg-lighter: #1f2335;
-  --bg-card: #24283b;
-  --fg: #c0caf5;
-  --fg-dim: #9aa5ce;
-  --fg-muted: #565f89;
-  --accent: #7aa2f7;
-  --border: #292e42;
-  --selection: #33467c;
-  --radius: 12px;
+  --bg: #202020;
+  --bg-lighter: #2b2b2b;
+  --bg-card: #2b2b2b;
+  --fg: #adadad;
+  --fg-dim: #adadad;
+  --fg-muted: #555555;
+  --accent: #6d9df1;
+  --border: #393939;
+  --selection: #1a3272;
+  --radius: 8px;
 }
 
 * {
