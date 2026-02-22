@@ -83,12 +83,17 @@ func themedColors(t *theme.Theme) colorScheme {
 		c.fgDim = lipgloss.Color(t.Palette[7])
 	}
 
-	// Background / selection
+	// Background — use palette 0 (black) lightened as the status bar bg,
+	// and derive a subtle selection highlight from it.
 	if t.Background != "" {
 		c.bg = lipgloss.Color(t.Background)
 	}
-	if t.SelectionBackground != "" {
-		c.selection = lipgloss.Color(t.SelectionBackground)
+	// Use palette 8 (bright black / comment) as the selection highlight.
+	// This is always a muted mid-tone that works as a subtle bar highlight,
+	// unlike selection-background which is designed for text selection and
+	// is often too bright/inverted.
+	if t.Palette[8] != "" {
+		c.selection = lipgloss.Color(t.Palette[8])
 	}
 
 	return c
