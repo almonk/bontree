@@ -63,18 +63,62 @@ func (m Model) View() string {
 
 func (m Model) renderStatusBar() string {
 	w := max(m.width, 80)
+	chevron := "\ue0b0" // 
+
+	// Determine mode label and color
+	var modeLabel string
+	var modeBg lipgloss.TerminalColor
+	if m.filtered || m.searching {
+		if m.flatSearch {
+			modeLabel = "FIND"
+		} else {
+			modeLabel = "FILTER"
+		}
+		modeBg = colorCyan
+	} else {
+		modeLabel = "NORMAL"
+		modeBg = colorBlue
+	}
+
+	// Mode segment
+	modeStyle := lipgloss.NewStyle().
+		Background(modeBg).
+		Foreground(lipgloss.Color("0")).
+		Bold(true)
+	modeChevronStyle := lipgloss.NewStyle().
+		Foreground(modeBg)
 
 	var left string
+
 	if m.flashMsg != "" {
-		left = statusFlashStyle.Render(" " + m.flashMsg)
-	} else if m.filtered || m.searching {
-		label := "filter"
-		if m.flatSearch {
-			label = "find"
+		left = modeStyle.Render(" "+modeLabel+" ") +
+			lipgloss.NewStyle().Foreground(modeBg).Background(colorBg).Render(chevron) +
+			statusFlashStyle.Render(" "+m.flashMsg)
+	} else {
+		// Branch segment
+		branchText := ""
+		if m.gitBranch != "" {
+			branchText = fmt.Sprintf(" \ue725 %s ", m.gitBranch)
 		}
-		left = statusFilterTagStyle.Render(fmt.Sprintf(" %s: %s ", label, m.searchQuery))
-	} else if m.gitBranch != "" {
-		left = statusBranchStyle.Render(fmt.Sprintf(" \ue725 %s", m.gitBranch))
+		branchBg := lipgloss.AdaptiveColor{Light: "252", Dark: "237"}
+
+		branchStyle := lipgloss.NewStyle().
+			Background(branchBg).
+			Foreground(colorBlue).
+			Bold(true)
+		branchChevronStyle := lipgloss.NewStyle().
+			Foreground(branchBg).
+			Background(colorBg)
+
+		left = modeStyle.Render(" "+modeLabel+" ") +
+			modeChevronStyle.Background(branchBg).Render(chevron)
+
+		if branchText != "" {
+			left += branchStyle.Render(branchText) +
+				branchChevronStyle.Render(chevron)
+		} else {
+			left += lipgloss.NewStyle().Foreground(modeBg).Background(colorBg).Render(chevron)
+		}
 	}
 
 	right := statusHelpStyle.Render(" ?:help  c:copy  q:quit ")
