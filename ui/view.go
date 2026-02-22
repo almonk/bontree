@@ -217,7 +217,14 @@ func (m Model) renderNode(node *tree.Node, selected bool, maxWidth int) string {
 		parts = append(parts, m.renderNameHighlighted(displayName, nameIndices, selectedStyle, matchHighlightSelectedStyle))
 
 		if displayDirPath != "" {
-			parts = append(parts, selectedStyle.Render("  "))
+			// Align dir path at 50% column, same as unselected rows
+			leftWidth := lipgloss.Width(strings.Join(parts, ""))
+			halfCol := maxWidth / 2
+			gap := halfCol - leftWidth
+			if gap < 2 {
+				gap = 2
+			}
+			parts = append(parts, selectedStyle.Render(strings.Repeat(" ", gap)))
 			parts = append(parts, m.renderNameHighlighted(displayDirPath, pathIndices, flatPathSelectedStyle, matchHighlightSelectedStyle))
 		}
 
