@@ -68,10 +68,11 @@ func (m Model) renderStatusBar() string {
 	if m.filtered || m.searching {
 		if m.flatSearch {
 			modeLabel = "FLAT"
+			modeBg = colorOrange
 		} else {
 			modeLabel = "FILTER"
+			modeBg = colorPurple
 		}
-		modeBg = colorCyan
 	} else {
 		modeLabel = "NORMAL"
 		modeBg = colorBlue
