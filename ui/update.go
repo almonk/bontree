@@ -143,10 +143,10 @@ func (m Model) updateSearchMode(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case action == config.ActionMoveUp || key == "up":
 		m.moveCursor(-1)
 
-	case action == config.ActionSearchNextMatch:
+	case action == config.ActionSearchNextMatch || action == config.ActionExpand || key == "right":
 		m.jumpToMatch(1)
 
-	case action == config.ActionSearchPrevMatch:
+	case action == config.ActionSearchPrevMatch || action == config.ActionCollapse || key == "left":
 		m.jumpToMatch(-1)
 	}
 
