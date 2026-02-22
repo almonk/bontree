@@ -161,33 +161,33 @@ func (m Model) renderNode(node *tree.Node, selected bool, maxWidth int) string {
 	pathIndices := m.searchPathIndices[node]
 
 	if dirPath != "" {
-		// "  " separator costs 2 columns
+		// Budget: give the name up to 40% of available, the rest to the path.
 		nameWidth := runeLen(displayName)
 		dirWidth := runeLen(displayDirPath)
-		total := nameWidth + 2 + dirWidth
-		if total > available {
-			// Truncate dirPath first, then name if still needed
-			dirAlloc := available - nameWidth - 2
-			if dirAlloc < 3 {
-				dirAlloc = 3
-			}
-			if dirWidth > dirAlloc {
-				displayDirPath, pathIndices = middleTruncate(displayDirPath, dirAlloc, pathIndices)
-			}
-			nameAlloc := available - 2 - runeLen(displayDirPath)
-			if nameAlloc < 4 {
-				nameAlloc = 4
-			}
-			if nameWidth > nameAlloc {
-				displayName, nameIndices = middleTruncate(displayName, nameAlloc, nameIndices)
-			}
+		gap := 2 // separator between name and path
+
+		nameMax := available * 2 / 5
+		if nameMax < 8 {
+			nameMax = 8
+		}
+		if nameWidth > nameMax {
+			displayName, nameIndices = middleTruncate(displayName, nameMax, nameIndices)
+			nameWidth = runeLen(displayName)
+		}
+
+		pathMax := available - nameWidth - gap
+		if pathMax < 10 {
+			pathMax = 10
+		}
+		if dirWidth > pathMax {
+			displayDirPath, pathIndices = middleTruncate(displayDirPath, pathMax, pathIndices)
 		}
 	} else if runeLen(displayName) > available {
 		displayName, nameIndices = middleTruncate(displayName, available, nameIndices)
 	}
 
 	if selected {
-		treeLineSelectedStyle := treeLineStyle.Background(colorSelection)
+		treeLineSelectedStyle := lipgloss.NewStyle().Foreground(colorFgDim).Background(colorSelection)
 		var parts []string
 		parts = append(parts, selectedStyle.Render(" "))
 		if prefix != "" {
@@ -197,16 +197,8 @@ func (m Model) renderNode(node *tree.Node, selected bool, maxWidth int) string {
 		parts = append(parts, m.renderNameHighlighted(displayName, nameIndices, selectedStyle, matchHighlightSelectedStyle))
 
 		if displayDirPath != "" {
-			// Place dir path at 50% column
-			leftWidth := lipgloss.Width(strings.Join(parts, ""))
-			dirRendered := m.renderNameHighlighted(displayDirPath, pathIndices, flatPathSelectedStyle, matchHighlightSelectedStyle)
-			halfCol := maxWidth / 2
-			gap := halfCol - leftWidth
-			if gap < 2 {
-				gap = 2
-			}
-			parts = append(parts, selectedStyle.Render(strings.Repeat(" ", gap)))
-			parts = append(parts, dirRendered)
+			parts = append(parts, selectedStyle.Render("  "))
+			parts = append(parts, m.renderNameHighlighted(displayDirPath, pathIndices, flatPathSelectedStyle, matchHighlightSelectedStyle))
 		}
 
 		if plainLen := lipgloss.Width(strings.Join(parts, "")); plainLen < maxWidth {

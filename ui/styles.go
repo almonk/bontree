@@ -207,7 +207,7 @@ func ApplyTheme(t *theme.Theme) {
 
 	flatPathSelectedStyle = lipgloss.NewStyle().
 		Background(colors.selection).
-		Foreground(colors.comment)
+		Foreground(colors.fgDim)
 
 	statusBase = lipgloss.NewStyle().
 		Background(colors.bg)
