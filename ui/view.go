@@ -67,7 +67,7 @@ func (m Model) renderStatusBar() string {
 	var left string
 	if m.flashMsg != "" {
 		left = statusFlashStyle.Render(" " + m.flashMsg)
-	} else if m.filtered {
+	} else if m.filtered || m.searching {
 		label := "filter"
 		if m.flatSearch {
 			label = "find"
