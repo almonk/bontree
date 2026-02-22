@@ -19,7 +19,7 @@ const (
 // Extension-based icons mapping (Nerd Font)
 var extIcons = map[string]string{
 	// Programming languages
-	".go":     "\ue626", // 
+	".go":     "\ue65e", // 
 	".py":     "\ue73c", // 
 	".js":     "\ue74e", // 
 	".ts":     "\ue628", // 
@@ -150,16 +150,16 @@ var nameIcons = map[string]string{
 	".gitignore":     "\ue702", // 
 	".gitmodules":    "\ue702",
 	".gitattributes": "\ue702",
-	"go.mod":         "\ue626", // 
-	"go.sum":         "\ue626",
+	"go.mod":         "\ue65e", // 
+	"go.sum":         "\ue65e",
 	"Cargo.toml":     "\ue7a8",
 	"Cargo.lock":     "\ue7a8",
 	"package.json":   "\ue71e", // 
 	"package-lock.json": "\ue71e",
 	"tsconfig.json":  "\ue628",
 	"webpack.config.js": "\ue74e",
-	"LICENSE":        "\uf718", // 
-	"license":        "\uf718",
+	"LICENSE":        "\uf15c", // 
+	"license":        "\uf15c",
 	"README.md":      "\ue73e",
 	"readme.md":      "\ue73e",
 	".env":           "\uf462",
@@ -200,9 +200,10 @@ func GetIcon(name string, isDir bool, isOpen bool) string {
 	}
 
 	// Check extension
-	ext := strings.ToLower(getExt(name))
-	if icon, ok := extIcons[ext]; ok {
-		return icon
+	if i := strings.LastIndexByte(name, '.'); i >= 0 {
+		if icon, ok := extIcons[strings.ToLower(name[i:])]; ok {
+			return icon
+		}
 	}
 
 	// Check if hidden/dot file
@@ -211,13 +212,4 @@ func GetIcon(name string, isDir bool, isOpen bool) string {
 	}
 
 	return FileDefault
-}
-
-func getExt(name string) string {
-	for i := len(name) - 1; i >= 0; i-- {
-		if name[i] == '.' {
-			return name[i:]
-		}
-	}
-	return ""
 }

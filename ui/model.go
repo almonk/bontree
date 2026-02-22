@@ -15,123 +15,99 @@ import (
 	"github.com/sahilm/fuzzy"
 )
 
+// Color palette
+const (
+	colorBg        = "#1a1b26"
+	colorBlue      = "#7aa2f7"
+	colorFg        = "#c0caf5"
+	colorFgDim     = "#a9b1d6"
+	colorComment   = "#565f89"
+	colorGutter    = "#3b4261"
+	colorGreen     = "#9ece6a"
+	colorYellow    = "#e0af68"
+	colorOrange    = "#ff9e64"
+	colorPurple    = "#bb9af7"
+	colorRed       = "#f7768e"
+	colorCyan      = "#7dcfff"
+	colorSelection = "#283457"
+)
+
 // Styles
 var (
 	titleStyle = lipgloss.NewStyle().
 			Bold(true).
-			Foreground(lipgloss.Color("#7aa2f7")).
+			Foreground(lipgloss.Color(colorBlue)).
 			PaddingLeft(1)
 
 	selectedStyle = lipgloss.NewStyle().
-			Background(lipgloss.Color("#283457")).
-			Foreground(lipgloss.Color("#c0caf5")).
+			Background(lipgloss.Color(colorSelection)).
+			Foreground(lipgloss.Color(colorFg)).
 			Bold(true)
 
 	dirStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#7aa2f7")).
+			Foreground(lipgloss.Color(colorBlue)).
 			Bold(true)
 
 	fileStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#a9b1d6"))
+			Foreground(lipgloss.Color(colorFgDim))
 
 	treeLineStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#3b4261"))
+			Foreground(lipgloss.Color(colorGutter))
 
 	iconDirStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#7aa2f7"))
+			Foreground(lipgloss.Color(colorBlue))
 
 	iconFileStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#7dcfff"))
-
-	flashStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#9ece6a")).
-			Bold(true)
-
-	rootIconStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#e0af68")).
-			Bold(true)
-
-	// Status bar styles
-	statusBarBgStyle = lipgloss.NewStyle().
-				Background(lipgloss.Color("#1a1b26")).
-				Foreground(lipgloss.Color("#565f89"))
-
-	statusPathStyle = lipgloss.NewStyle().
-			Background(lipgloss.Color("#1a1b26")).
-			Foreground(lipgloss.Color("#a9b1d6")).
-			PaddingLeft(1).
-			PaddingRight(1)
-
-	statusBranchStyle = lipgloss.NewStyle().
-				Background(lipgloss.Color("#1a1b26")).
-				Foreground(lipgloss.Color("#bb9af7")).
-				Bold(true)
-
-	statusCountStyle = lipgloss.NewStyle().
-				Background(lipgloss.Color("#1a1b26")).
-				Foreground(lipgloss.Color("#565f89")).
-				PaddingRight(1)
-
-	statusFlashStyle = lipgloss.NewStyle().
-				Background(lipgloss.Color("#1a1b26")).
-				Foreground(lipgloss.Color("#9ece6a")).
-				Bold(true).
-				PaddingLeft(1)
-
-	statusHelpStyle = lipgloss.NewStyle().
-			Background(lipgloss.Color("#1a1b26")).
-			Foreground(lipgloss.Color("#3b4261"))
-
-	statusModifiedStyle = lipgloss.NewStyle().
-				Background(lipgloss.Color("#1a1b26")).
-				Foreground(lipgloss.Color("#e0af68")).
-				Bold(true)
-
-	statusStagedStyle = lipgloss.NewStyle().
-				Background(lipgloss.Color("#1a1b26")).
-				Foreground(lipgloss.Color("#9ece6a")).
-				Bold(true)
-
-	statusUntrackedStyle = lipgloss.NewStyle().
-				Background(lipgloss.Color("#1a1b26")).
-				Foreground(lipgloss.Color("#f7768e")).
-				Bold(true)
-
-	searchInputStyle = lipgloss.NewStyle().
-				Background(lipgloss.Color("#1a1b26")).
-				Foreground(lipgloss.Color("#c0caf5")).
-				PaddingLeft(1)
-
-	searchPromptStyle = lipgloss.NewStyle().
-				Background(lipgloss.Color("#1a1b26")).
-				Foreground(lipgloss.Color("#7aa2f7")).
-				Bold(true).
-				PaddingLeft(1)
+			Foreground(lipgloss.Color(colorCyan))
 
 	matchHighlightStyle = lipgloss.NewStyle().
-				Foreground(lipgloss.Color("#ff9e64")).
+				Foreground(lipgloss.Color(colorOrange)).
 				Bold(true)
 
 	matchHighlightSelectedStyle = lipgloss.NewStyle().
-					Background(lipgloss.Color("#283457")).
-					Foreground(lipgloss.Color("#ff9e64")).
+					Background(lipgloss.Color(colorSelection)).
+					Foreground(lipgloss.Color(colorOrange)).
 					Bold(true)
+
+	flatPathStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color(colorComment))
+
+	flatPathSelectedStyle = lipgloss.NewStyle().
+				Background(lipgloss.Color(colorSelection)).
+				Foreground(lipgloss.Color(colorComment))
+
+	// Status bar base style — all status styles inherit this background
+	statusBase = lipgloss.NewStyle().
+			Background(lipgloss.Color(colorBg))
+
+	statusPathStyle     = statusBase.Foreground(lipgloss.Color(colorFgDim)).PaddingLeft(1).PaddingRight(1)
+	statusBranchStyle   = statusBase.Foreground(lipgloss.Color(colorPurple)).Bold(true)
+	statusFlashStyle = statusBase.Foreground(lipgloss.Color(colorGreen)).Bold(true).PaddingLeft(1)
+	statusHelpStyle  = statusBase.Foreground(lipgloss.Color(colorGutter))
+
+	searchInputStyle  = statusBase.Foreground(lipgloss.Color(colorFg)).PaddingLeft(1)
+	searchPromptStyle = statusBase.Foreground(lipgloss.Color(colorBlue)).Bold(true).PaddingLeft(1)
+)
+
+// gitFileStatus represents the git state of a file
+type gitFileStatus int
+
+const (
+	gitUnchanged  gitFileStatus = iota
+	gitModified                         // working tree modified
+	gitAdded                            // staged / new tracked file
+	gitDeleted                          // deleted
+	gitUntracked                        // untracked (?)
 )
 
 type clearFlashMsg struct{}
 type gitRefreshMsg struct{}
-
-func gitRefreshTick() tea.Cmd {
-	return tea.Tick(2*time.Second, func(t time.Time) tea.Msg {
-		return gitRefreshMsg{}
-	})
+type gitInfoMsg struct {
+	branch     string
+	fileStatus map[string]gitFileStatus // relative path -> status
 }
 
-type gitStatus struct {
-	staged    int
-	modified  int
-	untracked int
-}
+
 
 // Model is the Bubble Tea model
 type Model struct {
@@ -143,21 +119,29 @@ type Model struct {
 	rootPath  string
 	flashMsg  string
 	showHelp  bool
-	scrollOff  int // viewport scroll offset
+	scrollOff int
 	gitBranch  string
-	gitStatus  gitStatus
+	gitFiles   map[string]gitFileStatus // relative path -> status
 	showHidden bool
 
+	// Mouse
+	lastClickTime time.Time
+	lastClickRow  int
+
+
+
 	// Search
-	searching    bool
-	filtered     bool // true when search confirmed and showing filtered results
-	searchQuery  string
-	searchNodes  []*tree.Node // filtered flat list preserving hierarchy
-	searchMatchIndices map[*tree.Node][]int // char indices that matched for highlighting
+	searching          bool
+	filtered           bool
+	flatSearch         bool // true = flat file search (ctrl+f), false = hierarchy search (/)
+	searchQuery        string
+	searchNodes        []*tree.Node
+	searchMatchIndices map[*tree.Node][]int // match indices within the node name
+	searchPathIndices  map[*tree.Node][]int // match indices within the parent path (flat search)
 
 	// Saved state before search
-	savedExpanded map[*tree.Node]bool
-	savedCursor   int
+	savedExpanded  map[*tree.Node]bool
+	savedCursor    int
 	savedScrollOff int
 }
 
@@ -168,144 +152,98 @@ func New(rootPath string) (Model, error) {
 		return Model{}, err
 	}
 
-	flat := flattenSkipRoot(root)
-
-	m := Model{
-		root:      root,
-		flatNodes: flat,
-		cursor:    0,
-		rootPath:  rootPath,
-	}
-
-	return m, nil
-}
-
-type gitInfoMsg struct {
-	branch string
-	status gitStatus
-}
-
-func fetchGitInfo(path string) tea.Cmd {
-	return func() tea.Msg {
-		return gitInfoMsg{
-			branch: getGitBranch(path),
-			status: getGitStatus(path),
-		}
-	}
-}
-
-// flattenSkipRoot returns the flattened tree without the root node itself
-func flattenSkipRoot(root *tree.Node) []*tree.Node {
-	all := tree.Flatten(root)
-	if len(all) > 1 {
-		return all[1:] // skip the root
-	}
-	return all
-}
-
-func getGitBranch(path string) string {
-	// Try rev-parse first (works when there are commits)
-	cmd := exec.Command("git", "-C", path, "rev-parse", "--abbrev-ref", "HEAD")
-	out, err := cmd.Output()
-	if err == nil {
-		branch := strings.TrimSpace(string(out))
-		if branch != "" {
-			return branch
-		}
-	}
-	// Fall back to symbolic-ref for repos with no commits yet
-	cmd = exec.Command("git", "-C", path, "symbolic-ref", "--short", "HEAD")
-	out, err = cmd.Output()
-	if err == nil {
-		branch := strings.TrimSpace(string(out))
-		if branch != "" {
-			return branch
-		}
-	}
-	return ""
-}
-
-func getGitStatus(path string) gitStatus {
-	var gs gitStatus
-	cmd := exec.Command("git", "-C", path, "status", "--porcelain")
-	out, err := cmd.Output()
-	if err != nil {
-		return gs
-	}
-	lines := strings.Split(strings.TrimSpace(string(out)), "\n")
-	for _, line := range lines {
-		if len(line) < 2 {
-			continue
-		}
-		x := line[0] // index/staged status
-		y := line[1] // working tree status
-		if x == '?' {
-			gs.untracked++
-		} else {
-			if x != ' ' && x != '?' {
-				gs.staged++
-			}
-			if y != ' ' && y != '?' {
-				gs.modified++
-			}
-		}
-	}
-	return gs
-}
-
-// nodeSource implements fuzzy.Source for tree nodes
-type nodeSource []*tree.Node
-
-func (ns nodeSource) String(i int) string { return ns[i].Name }
-func (ns nodeSource) Len() int            { return len(ns) }
-
-// updateSearch filters the full tree using fuzzy matching, preserving hierarchy.
-func (m *Model) updateSearch() {
-	if m.searchQuery == "" {
-		m.searchNodes = nil
-		m.searchMatchIndices = nil
-		return
-	}
-
-	// Get all nodes from tree
-	allNodes := tree.FlattenAll(m.root)
-
-	// Run fuzzy match
-	results := fuzzy.FindFrom(m.searchQuery, nodeSource(allNodes))
-
-	// Build match map: node -> matched char indices
-	matchMap := make(map[*tree.Node][]int)
-	matchSet := make(map[*tree.Node]bool)
-	for _, r := range results {
-		node := allNodes[r.Index]
-		matchMap[node] = r.MatchedIndexes
-		matchSet[node] = true
-		// Mark all ancestors as included to preserve hierarchy
-		ancestor := node.Parent
-		for ancestor != nil {
-			if matchSet[ancestor] {
-				break
-			}
-			matchSet[ancestor] = true
-			ancestor = ancestor.Parent
-		}
-	}
-
-	// Build filtered list preserving original order and hierarchy
-	var filtered []*tree.Node
-	for _, node := range allNodes {
-		if matchSet[node] && node != m.root {
-			filtered = append(filtered, node)
-		}
-	}
-
-	m.searchNodes = filtered
-	m.searchMatchIndices = matchMap
+	return Model{
+		root:       root,
+		flatNodes:  flattenSkipRoot(root),
+		rootPath:   rootPath,
+		showHidden: tree.ShowHidden,
+	}, nil
 }
 
 func (m Model) Init() tea.Cmd {
 	return tea.Batch(fetchGitInfo(m.rootPath), gitRefreshTick())
 }
+
+// --- Helpers to reduce repetition ---
+
+// refreshFlatNodes rebuilds the flat node list and clamps the cursor.
+func (m *Model) refreshFlatNodes() {
+	m.flatNodes = flattenSkipRoot(m.root)
+	m.clampCursor()
+}
+
+// clampCursor ensures cursor is within bounds.
+func (m *Model) clampCursor() {
+	if m.cursor >= len(m.flatNodes) {
+		m.cursor = len(m.flatNodes) - 1
+	}
+	if m.cursor < 0 {
+		m.cursor = 0
+	}
+}
+
+// moveCursor moves the cursor by delta and ensures it stays visible.
+func (m *Model) moveCursor(delta int) {
+	m.cursor += delta
+	m.clampCursor()
+	m.ensureVisible()
+}
+
+// setExpandAll recursively sets the expanded state on all directory nodes.
+func (m *Model) setExpandAll(node *tree.Node, expanded bool) {
+	if node.IsDir {
+		if expanded {
+			node.Expand()
+		} else {
+			node.Collapse()
+		}
+		for _, child := range node.Children {
+			m.setExpandAll(child, expanded)
+		}
+	}
+}
+
+// jumpToMatch moves cursor to the next (dir=+1) or previous (dir=-1) fuzzy match.
+func (m *Model) jumpToMatch(dir int) {
+	if m.searchMatchIndices == nil || len(m.flatNodes) == 0 {
+		return
+	}
+	n := len(m.flatNodes)
+	for step := 1; step < n; step++ {
+		idx := (m.cursor + dir*step%n + n) % n
+		if _, ok := m.searchMatchIndices[m.flatNodes[idx]]; ok {
+			m.cursor = idx
+			m.ensureVisible()
+			return
+		}
+	}
+}
+
+// applySearchFilter runs the appropriate fuzzy search and updates flatNodes/cursor.
+func (m *Model) applySearchFilter() {
+	if m.flatSearch {
+		m.updateFlatSearch()
+	} else {
+		m.updateSearch()
+	}
+	if m.searchNodes != nil {
+		m.flatNodes = m.searchNodes
+	} else {
+		m.flatNodes = flattenSkipRoot(m.root)
+	}
+	m.cursor = 0
+	m.scrollOff = 0
+}
+
+// flash sets a temporary flash message that auto-clears.
+func flash(m *Model, msg string) tea.Cmd {
+	m.flashMsg = msg
+	return tea.Tick(2*time.Second, func(t time.Time) tea.Msg {
+		return clearFlashMsg{}
+	})
+}
+
+// --- Update ---
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
@@ -320,181 +258,167 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case gitInfoMsg:
 		m.gitBranch = msg.branch
-		m.gitStatus = msg.status
+		m.gitFiles = msg.fileStatus
+		if !m.searching {
+			m.refreshTree()
+		}
 		return m, gitRefreshTick()
 
 	case gitRefreshMsg:
 		return m, fetchGitInfo(m.rootPath)
 
+	case tea.MouseMsg:
+		return m.updateMouse(msg)
+
 	case tea.KeyMsg:
-		// Search mode input handling
 		if m.searching {
-			switch msg.String() {
-			case "esc":
-				m.searching = false
-				m.filtered = false
-				m.searchQuery = ""
-				m.searchNodes = nil
-				m.searchMatchIndices = nil
-				m.restoreExpandedState()
-				return m, nil
+			return m.updateSearchMode(msg)
+		}
+		return m.updateNormalMode(msg)
+	}
 
-			case "enter":
-				m.searching = false
-				m.filtered = true
-				// Keep filtered results as current view
-				if m.searchNodes != nil {
-					m.flatNodes = m.searchNodes
-				}
-				if m.cursor >= len(m.flatNodes) {
-					m.cursor = len(m.flatNodes) - 1
-				}
-				if m.cursor < 0 {
-					m.cursor = 0
-				}
-				return m, nil
+	return m, nil
+}
 
-			case "backspace":
-				if len(m.searchQuery) > 0 {
-					_, size := utf8.DecodeLastRuneInString(m.searchQuery)
-					m.searchQuery = m.searchQuery[:len(m.searchQuery)-size]
-					m.updateSearch()
-					if m.searchNodes != nil {
-						m.flatNodes = m.searchNodes
-					} else {
-						m.flatNodes = flattenSkipRoot(m.root)
-					}
-					m.cursor = 0
-					m.scrollOff = 0
-				}
-				return m, nil
-
-			case "ctrl+c":
-				return m, tea.Quit
-
-			case "j", "down":
-				if m.cursor < len(m.flatNodes)-1 {
-					m.cursor++
-					m.ensureVisible()
-				}
-				return m, nil
-
-			case "k", "up":
-				if m.cursor > 0 {
-					m.cursor--
-					m.ensureVisible()
-				}
-				return m, nil
-
-			case "right":
-				m.jumpToNextMatch()
-				return m, nil
-
-			case "left":
-				m.jumpToPrevMatch()
-				return m, nil
-
-			default:
-				// Only add printable characters
-				if msg.Type == tea.KeyRunes {
-					m.searchQuery += msg.String()
-					m.updateSearch()
-					if m.searchNodes != nil {
-						m.flatNodes = m.searchNodes
-					} else {
-						m.flatNodes = flattenSkipRoot(m.root)
-					}
-					m.cursor = 0
-					m.scrollOff = 0
-				}
-				return m, nil
-			}
+func (m Model) updateMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
+	switch {
+	case msg.Button == tea.MouseButtonWheelUp:
+		m.moveCursor(-3)
+	case msg.Button == tea.MouseButtonWheelDown:
+		m.moveCursor(3)
+	case msg.Button == tea.MouseButtonLeft && msg.Action == tea.MouseActionPress:
+		row := msg.Y + m.scrollOff
+		if row < 0 || row >= len(m.flatNodes) {
+			break
 		}
 
-		switch msg.String() {
-		case "esc":
-			if m.filtered {
-				m.filtered = false
-				m.searchQuery = ""
-				m.searchNodes = nil
-				m.searchMatchIndices = nil
-				m.restoreExpandedState()
+		now := time.Now()
+		doubleClick := row == m.lastClickRow && now.Sub(m.lastClickTime) < 400*time.Millisecond
+		m.lastClickTime = now
+		m.lastClickRow = row
+
+		if doubleClick {
+			node := m.flatNodes[row]
+			if node.IsDir {
+				node.Toggle()
+				m.refreshFlatNodes()
 			}
-			return m, nil
-
-		case "q", "ctrl+c":
-			return m, tea.Quit
-
-		case "j", "down":
-			if m.cursor < len(m.flatNodes)-1 {
-				m.cursor++
-				m.ensureVisible()
-			}
-
-		case "k", "up":
-			if m.cursor > 0 {
-				m.cursor--
-				m.ensureVisible()
-			}
-
-		case "g":
-			m.cursor = 0
-			m.scrollOff = 0
-
-		case "G":
-			m.cursor = len(m.flatNodes) - 1
+		} else {
+			m.cursor = row
 			m.ensureVisible()
+		}
+	}
+	return m, nil
+}
 
-		case "ctrl+d":
-			viewH := m.viewportHeight()
-			jump := viewH / 2
-			m.cursor += jump
-			if m.cursor >= len(m.flatNodes) {
-				m.cursor = len(m.flatNodes) - 1
-			}
-			m.ensureVisible()
+func (m Model) updateSearchMode(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case "esc":
+		m.searching = false
+		m.filtered = false
+		m.flatSearch = false
+		m.searchQuery = ""
+		m.searchNodes = nil
+		m.searchMatchIndices = nil
+		m.searchPathIndices = nil
+		m.restoreExpandedState()
 
-		case "ctrl+u":
-			viewH := m.viewportHeight()
-			jump := viewH / 2
-			m.cursor -= jump
-			if m.cursor < 0 {
-				m.cursor = 0
-			}
-			m.ensureVisible()
+	case "enter":
+		m.searching = false
+		m.filtered = true
+		if m.searchNodes != nil {
+			m.flatNodes = m.searchNodes
+		}
+		m.clampCursor()
 
-		case "l", "right":
-			if m.filtered {
-				m.jumpToNextMatch()
-				break
-			}
+	case "backspace":
+		if len(m.searchQuery) > 0 {
+			_, size := utf8.DecodeLastRuneInString(m.searchQuery)
+			m.searchQuery = m.searchQuery[:len(m.searchQuery)-size]
+			m.applySearchFilter()
+		}
+
+	case "ctrl+c":
+		return m, tea.Quit
+
+	case "j", "down":
+		m.moveCursor(1)
+
+	case "k", "up":
+		m.moveCursor(-1)
+
+	case "right":
+		m.jumpToMatch(1)
+
+	case "left":
+		m.jumpToMatch(-1)
+
+	default:
+		if msg.Type == tea.KeyRunes {
+			m.searchQuery += msg.String()
+			m.applySearchFilter()
+		}
+	}
+
+	return m, nil
+}
+
+func (m Model) updateNormalMode(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case "esc":
+		if m.filtered {
+			m.filtered = false
+			m.flatSearch = false
+			m.searchQuery = ""
+			m.searchNodes = nil
+			m.searchMatchIndices = nil
+			m.searchPathIndices = nil
+			m.restoreExpandedState()
+		}
+
+	case "q", "ctrl+c":
+		return m, tea.Quit
+
+	case "j", "down":
+		m.moveCursor(1)
+
+	case "k", "up":
+		m.moveCursor(-1)
+
+	case "g":
+		m.cursor = 0
+		m.scrollOff = 0
+
+	case "G":
+		m.cursor = len(m.flatNodes) - 1
+		m.ensureVisible()
+
+	case "ctrl+d":
+		m.moveCursor(m.viewportHeight() / 2)
+
+	case "ctrl+u":
+		m.moveCursor(-m.viewportHeight() / 2)
+
+	case "l", "right":
+		if m.filtered {
+			m.jumpToMatch(1)
+		} else {
 			node := m.flatNodes[m.cursor]
 			if node.IsDir && !node.Expanded {
 				node.Expand()
-				m.flatNodes = flattenSkipRoot(m.root)
+				m.refreshFlatNodes()
 			}
+		}
 
-		case "enter":
-			node := m.flatNodes[m.cursor]
-			if node.IsDir {
-				node.Toggle()
-				m.flatNodes = flattenSkipRoot(m.root)
-				if m.cursor >= len(m.flatNodes) {
-					m.cursor = len(m.flatNodes) - 1
-				}
-			}
-
-		case "h", "left":
-			if m.filtered {
-				m.jumpToPrevMatch()
-				break
-			}
+	case "h", "left":
+		if m.filtered {
+			m.jumpToMatch(-1)
+		} else {
 			node := m.flatNodes[m.cursor]
 			if node.IsDir && node.Expanded {
 				node.Collapse()
-				m.flatNodes = flattenSkipRoot(m.root)
+				m.refreshFlatNodes()
 			} else if node.Parent != nil && node.Parent != m.root {
-				// Jump to parent (but not the hidden root)
 				for i, n := range m.flatNodes {
 					if n == node.Parent {
 						m.cursor = i
@@ -503,84 +427,226 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					}
 				}
 			}
-
-		case " ":
-			node := m.flatNodes[m.cursor]
-			if node.IsDir {
-				node.Toggle()
-				m.flatNodes = flattenSkipRoot(m.root)
-				if m.cursor >= len(m.flatNodes) {
-					m.cursor = len(m.flatNodes) - 1
-				}
-			}
-
-		case "c":
-			node := m.flatNodes[m.cursor]
-			relPath := node.Path
-			// Strip the leading "./" from paths
-			relPath = strings.TrimPrefix(relPath, "./")
-			err := clipboard.WriteAll(relPath)
-			if err != nil {
-				m.flashMsg = fmt.Sprintf("✗ Failed to copy: %s", err)
-			} else {
-				m.flashMsg = fmt.Sprintf("✓ Copied: %s", relPath)
-			}
-			return m, tea.Tick(2*time.Second, func(t time.Time) tea.Msg {
-				return clearFlashMsg{}
-			})
-
-		case "E":
-			m.expandAll(m.root)
-			m.flatNodes = flattenSkipRoot(m.root)
-
-		case "W":
-			m.collapseAll(m.root)
-			m.root.Expanded = true
-			m.flatNodes = flattenSkipRoot(m.root)
-			m.cursor = 0
-			m.scrollOff = 0
-
-		case ".":
-			m.showHidden = !m.showHidden
-			tree.ShowHidden = m.showHidden
-			root, err := tree.BuildTree(m.rootPath)
-			if err == nil {
-				m.root = root
-				m.flatNodes = flattenSkipRoot(m.root)
-				if m.cursor >= len(m.flatNodes) {
-					m.cursor = len(m.flatNodes) - 1
-				}
-				if m.cursor < 0 {
-					m.cursor = 0
-				}
-				m.ensureVisible()
-			}
-
-		case "/":
-			m.saveExpandedState()
-			m.searching = true
-			m.filtered = false
-			m.searchQuery = ""
-			m.searchNodes = nil
-			m.searchMatchIndices = nil
-			// Expand all for search
-			m.expandAll(m.root)
-			m.flatNodes = flattenSkipRoot(m.root)
-			m.cursor = 0
-			m.scrollOff = 0
-
-		case "?":
-			m.showHelp = !m.showHelp
 		}
+
+	case "enter", " ":
+		node := m.flatNodes[m.cursor]
+		if node.IsDir {
+			node.Toggle()
+			m.refreshFlatNodes()
+		}
+
+	case "c":
+		node := m.flatNodes[m.cursor]
+		relPath := strings.TrimPrefix(node.Path, "./")
+		if err := clipboard.WriteAll(relPath); err != nil {
+			return m, flash(&m, fmt.Sprintf("✗ Failed to copy: %s", err))
+		}
+		return m, flash(&m, fmt.Sprintf("✓ Copied: %s", relPath))
+
+	case "E":
+		m.setExpandAll(m.root, true)
+		m.refreshFlatNodes()
+
+	case "W":
+		m.setExpandAll(m.root, false)
+		m.root.Expanded = true
+		m.refreshFlatNodes()
+		m.cursor = 0
+		m.scrollOff = 0
+
+	case ".":
+		m.showHidden = !m.showHidden
+		tree.ShowHidden = m.showHidden
+		if root, err := tree.BuildTree(m.rootPath); err == nil {
+			m.root = root
+			m.refreshFlatNodes()
+			m.ensureVisible()
+		}
+
+	case "/":
+		m.startSearch(false)
+
+	case "ctrl+_", "ctrl+f":
+		m.startSearch(true)
+
+	case "?":
+		m.showHelp = !m.showHelp
 	}
 
 	return m, nil
 }
 
+// startSearch enters search mode. flat=true for flat file search, false for hierarchy search.
+func (m *Model) startSearch(flat bool) {
+	m.saveExpandedState()
+	m.searching = true
+	m.filtered = false
+	m.flatSearch = flat
+	m.searchQuery = ""
+	m.searchNodes = nil
+	m.searchMatchIndices = nil
+	m.searchPathIndices = nil
+	if !flat {
+		m.setExpandAll(m.root, true)
+	}
+	m.refreshFlatNodes()
+	m.cursor = 0
+	m.scrollOff = 0
+}
+
+// refreshTree rebuilds the file tree from disk, preserving expanded state and cursor.
+func (m *Model) refreshTree() {
+	// Capture expanded paths and cursor path
+	expandedPaths := make(map[string]bool)
+	for _, n := range tree.FlattenAll(m.root) {
+		if n.IsDir && n.Expanded {
+			expandedPaths[n.Path] = true
+		}
+	}
+	var cursorPath string
+	if m.cursor >= 0 && m.cursor < len(m.flatNodes) {
+		cursorPath = m.flatNodes[m.cursor].Path
+	}
+
+	// Rebuild
+	root, err := tree.BuildTree(m.rootPath)
+	if err != nil {
+		return
+	}
+	m.root = root
+
+	// Restore expanded state
+	for _, n := range tree.FlattenAll(m.root) {
+		if n.IsDir {
+			if expandedPaths[n.Path] {
+				n.Expand()
+			} else {
+				n.Collapse()
+			}
+		}
+	}
+	m.root.Expanded = true
+
+	if m.filtered && m.searchNodes != nil {
+		m.applySearchFilter()
+	} else {
+		m.refreshFlatNodes()
+	}
+
+	// Restore cursor position
+	if cursorPath != "" {
+		for i, n := range m.flatNodes {
+			if n.Path == cursorPath {
+				m.cursor = i
+				break
+			}
+		}
+	}
+	m.clampCursor()
+	m.ensureVisible()
+}
+
+// --- Search ---
+
+// nodeSource implements fuzzy.Source for tree nodes, matching against relative path
+type nodeSource []*tree.Node
+
+func (ns nodeSource) String(i int) string {
+	return strings.TrimPrefix(ns[i].Path, "./")
+}
+func (ns nodeSource) Len() int { return len(ns) }
+
+// splitMatchIndices splits full-path match indices into name indices and dir-path indices.
+// path is "dir/name", nameOffset is len(path) - len(name).
+func splitMatchIndices(indices []int, path, name string) (nameIndices, pathIndices []int) {
+	nameOffset := len(path) - len(name)
+	for _, idx := range indices {
+		if idx >= nameOffset {
+			nameIndices = append(nameIndices, idx-nameOffset)
+		} else {
+			pathIndices = append(pathIndices, idx)
+		}
+	}
+	return
+}
+
+func (m *Model) updateSearch() {
+	if m.searchQuery == "" {
+		m.searchNodes = nil
+		m.searchMatchIndices = nil
+		m.searchPathIndices = nil
+		m.searchPathIndices = nil
+		return
+	}
+
+	allNodes := tree.FlattenAll(m.root)
+	results := fuzzy.FindFrom(m.searchQuery, nodeSource(allNodes))
+
+	nameMap := make(map[*tree.Node][]int)
+	matchSet := make(map[*tree.Node]bool)
+	for _, r := range results {
+		node := allNodes[r.Index]
+		path := strings.TrimPrefix(node.Path, "./")
+		nameIdx, _ := splitMatchIndices(r.MatchedIndexes, path, node.Name)
+		nameMap[node] = nameIdx
+		matchSet[node] = true
+		for ancestor := node.Parent; ancestor != nil && !matchSet[ancestor]; ancestor = ancestor.Parent {
+			matchSet[ancestor] = true
+		}
+	}
+
+	var filtered []*tree.Node
+	for _, node := range allNodes {
+		if matchSet[node] && node != m.root {
+			filtered = append(filtered, node)
+		}
+	}
+
+	m.searchNodes = filtered
+	m.searchMatchIndices = nameMap
+	m.searchPathIndices = nil
+}
+
+// updateFlatSearch does a flat fuzzy search — no hierarchy, files first then dirs.
+func (m *Model) updateFlatSearch() {
+	if m.searchQuery == "" {
+		m.searchNodes = nil
+		m.searchMatchIndices = nil
+		m.searchPathIndices = nil
+		m.searchPathIndices = nil
+		return
+	}
+
+	allNodes := tree.FlattenAll(m.root)
+	results := fuzzy.FindFrom(m.searchQuery, nodeSource(allNodes))
+
+	nameMap := make(map[*tree.Node][]int)
+	pathMap := make(map[*tree.Node][]int)
+	var files, dirs []*tree.Node
+	for _, r := range results {
+		node := allNodes[r.Index]
+		path := strings.TrimPrefix(node.Path, "./")
+		nameIdx, pathIdx := splitMatchIndices(r.MatchedIndexes, path, node.Name)
+		nameMap[node] = nameIdx
+		pathMap[node] = pathIdx
+		if node.IsDir {
+			dirs = append(dirs, node)
+		} else {
+			files = append(files, node)
+		}
+	}
+
+	m.searchNodes = append(files, dirs...)
+	m.searchMatchIndices = nameMap
+	m.searchPathIndices = pathMap
+}
+
+// --- Expand/Collapse state save/restore ---
+
 func (m *Model) saveExpandedState() {
 	m.savedExpanded = make(map[*tree.Node]bool)
-	all := tree.FlattenAll(m.root)
-	for _, n := range all {
+	for _, n := range tree.FlattenAll(m.root) {
 		if n.IsDir {
 			m.savedExpanded[n] = n.Expanded
 		}
@@ -596,86 +662,20 @@ func (m *Model) restoreExpandedState() {
 	for node, expanded := range m.savedExpanded {
 		node.Expanded = expanded
 	}
-	m.flatNodes = flattenSkipRoot(m.root)
+	m.refreshFlatNodes()
 	m.cursor = m.savedCursor
-	if m.cursor >= len(m.flatNodes) {
-		m.cursor = len(m.flatNodes) - 1
-	}
-	if m.cursor < 0 {
-		m.cursor = 0
-	}
+	m.clampCursor()
 	m.scrollOff = m.savedScrollOff
 	m.savedExpanded = nil
 	m.ensureVisible()
 }
 
-// jumpToNextMatch moves cursor to the next node that has fuzzy match highlights
-func (m *Model) jumpToNextMatch() {
-	if m.searchMatchIndices == nil {
-		return
-	}
-	for i := m.cursor + 1; i < len(m.flatNodes); i++ {
-		if _, ok := m.searchMatchIndices[m.flatNodes[i]]; ok {
-			m.cursor = i
-			m.ensureVisible()
-			return
-		}
-	}
-	// Wrap around
-	for i := 0; i < m.cursor; i++ {
-		if _, ok := m.searchMatchIndices[m.flatNodes[i]]; ok {
-			m.cursor = i
-			m.ensureVisible()
-			return
-		}
-	}
-}
-
-// jumpToPrevMatch moves cursor to the previous node that has fuzzy match highlights
-func (m *Model) jumpToPrevMatch() {
-	if m.searchMatchIndices == nil {
-		return
-	}
-	for i := m.cursor - 1; i >= 0; i-- {
-		if _, ok := m.searchMatchIndices[m.flatNodes[i]]; ok {
-			m.cursor = i
-			m.ensureVisible()
-			return
-		}
-	}
-	// Wrap around
-	for i := len(m.flatNodes) - 1; i > m.cursor; i-- {
-		if _, ok := m.searchMatchIndices[m.flatNodes[i]]; ok {
-			m.cursor = i
-			m.ensureVisible()
-			return
-		}
-	}
-}
-
-func (m *Model) expandAll(node *tree.Node) {
-	if node.IsDir {
-		node.Expand()
-		for _, child := range node.Children {
-			m.expandAll(child)
-		}
-	}
-}
-
-func (m *Model) collapseAll(node *tree.Node) {
-	if node.IsDir {
-		node.Collapse()
-		for _, child := range node.Children {
-			m.collapseAll(child)
-		}
-	}
-}
+// --- Viewport ---
 
 func (m *Model) viewportHeight() int {
-	// height minus: status bar(1) + search bar(1 if searching)
-	h := m.height - 1
+	h := m.height - 1 // status bar
 	if m.searching {
-		h-- // search input takes a line
+		h-- // search input
 	}
 	if h < 1 {
 		h = 1
@@ -693,61 +693,54 @@ func (m *Model) ensureVisible() {
 	}
 }
 
+// --- View ---
+
 func (m Model) View() string {
 	if m.width == 0 || m.height == 0 {
 		return "Loading..."
 	}
-
 	if m.showHelp {
 		return m.helpView()
 	}
 
 	var b strings.Builder
 
-	// Tree content
 	viewH := m.viewportHeight()
 	end := m.scrollOff + viewH
 	if end > len(m.flatNodes) {
 		end = len(m.flatNodes)
 	}
 
-	contentWidth := m.width
-	if contentWidth < 20 {
-		contentWidth = 20
-	}
+	contentWidth := max(m.width, 20)
 
+	// Render visible tree lines
 	for i := m.scrollOff; i < end; i++ {
-		node := m.flatNodes[i]
-		line := m.renderNode(node, i == m.cursor, contentWidth)
-		b.WriteString(line)
-		if i < end-1 {
+		if i > m.scrollOff {
 			b.WriteString("\n")
 		}
+		b.WriteString(m.renderNode(m.flatNodes[i], i == m.cursor, contentWidth))
 	}
 
 	// Pad remaining lines
-	rendered := end - m.scrollOff
-	for i := rendered; i < viewH; i++ {
-		if i > 0 || rendered == 0 {
-			b.WriteString("\n")
-		}
+	for i := end - m.scrollOff; i < viewH; i++ {
+		b.WriteString("\n")
 	}
 
 	// Search input (above status bar)
 	if m.searching {
 		b.WriteString("\n")
-		prompt := searchPromptStyle.Render("/")
-		input := searchInputStyle.Render(m.searchQuery + "█")
-		searchLine := prompt + input
-		// Pad to full width
-		sw := lipgloss.Width(searchLine)
-		if sw < m.width {
-			searchLine += lipgloss.NewStyle().Background(lipgloss.Color("#1a1b26")).Render(strings.Repeat(" ", m.width-sw))
+		prompt := "/"
+		if m.flatSearch {
+			prompt = "find:"
+		}
+		searchLine := searchPromptStyle.Render(prompt) + searchInputStyle.Render(m.searchQuery+"█")
+		if sw := lipgloss.Width(searchLine); sw < m.width {
+			searchLine += statusBase.Render(strings.Repeat(" ", m.width-sw))
 		}
 		b.WriteString(searchLine)
 	}
 
-	// Status bar (full width)
+	// Status bar
 	b.WriteString("\n")
 	b.WriteString(m.renderStatusBar())
 
@@ -755,114 +748,101 @@ func (m Model) View() string {
 }
 
 func (m Model) renderStatusBar() string {
-	w := m.width
-	if w < 1 {
-		w = 80
-	}
+	w := max(m.width, 80)
 
 	var left string
 	if m.flashMsg != "" {
 		left = statusFlashStyle.Render(" " + m.flashMsg)
 	} else if m.gitBranch != "" {
-		branchIcon := "\ue725" //  git branch icon
-		branchStr := fmt.Sprintf(" %s %s", branchIcon, m.gitBranch)
-
-		// Append git status counts
-		var statusParts []string
-		if m.gitStatus.staged > 0 {
-			statusParts = append(statusParts, statusStagedStyle.Render(fmt.Sprintf("+%d", m.gitStatus.staged)))
-		}
-		if m.gitStatus.modified > 0 {
-			statusParts = append(statusParts, statusModifiedStyle.Render(fmt.Sprintf("~%d", m.gitStatus.modified)))
-		}
-		if m.gitStatus.untracked > 0 {
-			statusParts = append(statusParts, statusUntrackedStyle.Render(fmt.Sprintf("?%d", m.gitStatus.untracked)))
-		}
-
-		if len(statusParts) > 0 {
-			branchStr += " " + strings.Join(statusParts, " ")
-		}
-
-		left = statusBranchStyle.Render(branchStr)
+		left = statusBranchStyle.Render(fmt.Sprintf(" \ue725 %s", m.gitBranch))
 	}
 
-	// Right side: help
-	var rightParts []string
+	right := statusHelpStyle.Render(" ?:help  c:copy  q:quit ")
 
-	// Help keys
-	helpKeys := statusHelpStyle.Render(" ?:help  c:copy  q:quit ")
-	rightParts = append(rightParts, helpKeys)
-
-	right := strings.Join(rightParts, statusBranchStyle.Render("│"))
-
-	// Calculate padding
-	leftWidth := lipgloss.Width(left)
-	rightWidth := lipgloss.Width(right)
-	padding := w - leftWidth - rightWidth
+	padding := w - lipgloss.Width(left) - lipgloss.Width(right)
 	if padding < 0 {
 		padding = 0
 	}
 
-	padStr := statusBarBgStyle.Render(strings.Repeat(" ", padding))
-
-	return left + padStr + right
+	return left + statusBase.Render(strings.Repeat(" ", padding)) + right
 }
 
 func (m Model) renderNode(node *tree.Node, selected bool, maxWidth int) string {
-	// Since we skip root, adjust depth for display (depth 1 -> no indent for top-level)
-	displayDepth := node.Depth - 1
+	var prefix string
+	if !m.flatSearch {
+		prefix = m.getDisplayPrefix(node, node.Depth-1)
+	}
+	icon := icons.GetIcon(node.Name, node.IsDir, node.Expanded)
+	matchIndices := m.searchMatchIndices[node]
+
+	// In flat search mode, append the relative parent dir after the name
+	var dirPath string
+	if m.flatSearch && node.Parent != nil && node.Parent != m.root {
+		dirPath = strings.TrimPrefix(node.Parent.Path, "./")
+	}
+
+	if selected {
+		treeLineSelectedStyle := treeLineStyle.Background(lipgloss.Color(colorSelection))
+		var parts []string
+		parts = append(parts, selectedStyle.Render(" "))
+		if prefix != "" {
+			parts = append(parts, treeLineSelectedStyle.Render(prefix))
+		}
+		parts = append(parts, selectedStyle.Render(icon+" "))
+		parts = append(parts, m.renderNameHighlighted(node.Name, matchIndices, selectedStyle, matchHighlightSelectedStyle))
+		if dirPath != "" {
+			parts = append(parts, flatPathSelectedStyle.Render("  "))
+			parts = append(parts, m.renderNameHighlighted(dirPath, m.searchPathIndices[node], flatPathSelectedStyle, matchHighlightSelectedStyle))
+		}
+
+		if plainLen := lipgloss.Width(strings.Join(parts, "")); plainLen < maxWidth {
+			parts = append(parts, selectedStyle.Render(strings.Repeat(" ", maxWidth-plainLen)))
+		}
+		return strings.Join(parts, "")
+	}
 
 	var parts []string
-
-	// Tree prefix (indentation lines) — recalculated for display
-	prefix := m.getDisplayPrefix(node, displayDepth)
+	parts = append(parts, " ")
 	if prefix != "" {
 		parts = append(parts, treeLineStyle.Render(prefix))
 	}
 
-	// Icon
-	icon := icons.GetIcon(node.Name, node.IsDir, node.Expanded)
-	if node.IsDir {
-		parts = append(parts, iconDirStyle.Render(icon)+" ")
-	} else {
-		parts = append(parts, iconFileStyle.Render(icon)+" ")
+	iconStyle, nameStyle := m.gitNodeStyles(node)
+	parts = append(parts, iconStyle.Render(icon)+" ")
+	parts = append(parts, m.renderNameHighlighted(node.Name, matchIndices, nameStyle, matchHighlightStyle))
+	if dirPath != "" {
+		parts = append(parts, flatPathStyle.Render("  "))
+		parts = append(parts, m.renderNameHighlighted(dirPath, m.searchPathIndices[node], flatPathStyle, matchHighlightStyle))
 	}
-
-	// Name — with optional fuzzy match highlighting
-	name := node.Name
-	matchIndices := m.searchMatchIndices[node]
-
-	if selected {
-		// Re-render with selection highlight
-		var selParts []string
-
-		if prefix != "" {
-			selParts = append(selParts, treeLineStyle.Render(prefix))
-		}
-
-		selParts = append(selParts, selectedStyle.Render(icon+" "))
-		selParts = append(selParts, m.renderNameHighlighted(name, matchIndices, selectedStyle, matchHighlightSelectedStyle))
-
-		// Pad the selected line to fill width
-		plainLen := lipgloss.Width(strings.Join(selParts, ""))
-		if plainLen < maxWidth {
-			padding := strings.Repeat(" ", maxWidth-plainLen)
-			selParts = append(selParts, selectedStyle.Render(padding))
-		}
-
-		return strings.Join(selParts, "")
-	}
-
-	nameStyle := fileStyle
-	if node.IsDir {
-		nameStyle = dirStyle
-	}
-	parts = append(parts, m.renderNameHighlighted(name, matchIndices, nameStyle, matchHighlightStyle))
 
 	return strings.Join(parts, "")
 }
 
-// renderNameHighlighted renders a name with fuzzy match indices highlighted
+// gitNodeStyles returns the icon and name styles for a node based on its git status.
+func (m Model) gitNodeStyles(node *tree.Node) (lipgloss.Style, lipgloss.Style) {
+	if m.gitFiles != nil {
+		relPath := strings.TrimPrefix(node.Path, "./")
+		if status, ok := m.gitFiles[relPath]; ok {
+			switch status {
+			case gitModified:
+				color := lipgloss.Color(colorBlue)
+				return lipgloss.NewStyle().Foreground(color), lipgloss.NewStyle().Foreground(color)
+			case gitAdded, gitUntracked:
+				color := lipgloss.Color(colorGreen)
+				return lipgloss.NewStyle().Foreground(color), lipgloss.NewStyle().Foreground(color)
+			case gitDeleted:
+				color := lipgloss.Color(colorRed)
+				return lipgloss.NewStyle().Foreground(color), lipgloss.NewStyle().Foreground(color)
+			}
+		}
+	}
+	// Default styles
+	if node.IsDir {
+		return iconDirStyle, dirStyle
+	}
+	return iconFileStyle, fileStyle
+}
+
 func (m Model) renderNameHighlighted(name string, matchIndices []int, baseStyle, highlightStyle lipgloss.Style) string {
 	if len(matchIndices) == 0 {
 		return baseStyle.Render(name)
@@ -875,11 +855,10 @@ func (m Model) renderNameHighlighted(name string, matchIndices []int, baseStyle,
 
 	var result strings.Builder
 	for i, ch := range name {
-		s := string(ch)
 		if matchSet[i] {
-			result.WriteString(highlightStyle.Render(s))
+			result.WriteString(highlightStyle.Render(string(ch)))
 		} else {
-			result.WriteString(baseStyle.Render(s))
+			result.WriteString(baseStyle.Render(string(ch)))
 		}
 	}
 	return result.String()
@@ -893,17 +872,15 @@ func (m Model) getDisplayPrefix(node *tree.Node, displayDepth int) string {
 
 	var parts []string
 
-	// Current level connector
 	if node.IsLastChild() {
 		parts = append(parts, "└─")
 	} else {
 		parts = append(parts, "├─")
 	}
 
-	// Walk up ancestors (skip the hidden root)
 	current := node
 	ancestor := node.Parent
-	for ancestor != nil && ancestor.Parent != nil { // stop before root
+	for ancestor != nil && ancestor.Parent != nil {
 		if !current.Parent.IsLastChild() {
 			parts = append(parts, "│ ")
 		} else {
@@ -921,11 +898,12 @@ func (m Model) getDisplayPrefix(node *tree.Node, displayDepth int) string {
 	return strings.Join(parts, "")
 }
 
+// --- Help ---
+
 func (m Model) helpView() string {
 	var b strings.Builder
 
-	title := titleStyle.Render("  Keybindings")
-	b.WriteString(title)
+	b.WriteString(titleStyle.Render("  Keybindings"))
 	b.WriteString("\n\n")
 
 	bindings := []struct{ key, desc string }{
@@ -942,21 +920,22 @@ func (m Model) helpView() string {
 		{"c", "Copy relative path to clipboard"},
 		{"E", "Expand all"},
 		{"W", "Collapse all"},
-		{"/", "Fuzzy search"},
+		{"/", "Fuzzy search (tree)"},
+		{"Ctrl+f", "Flat file search"},
 		{".", "Toggle hidden files"},
 		{"?", "Toggle help"},
 		{"q / Ctrl+c", "Quit"},
 	}
 
 	keyStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#bb9af7")).
+		Foreground(lipgloss.Color(colorPurple)).
 		Bold(true).
 		Width(16).
 		Align(lipgloss.Left).
 		PaddingLeft(2)
 
 	descStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#a9b1d6"))
+		Foreground(lipgloss.Color(colorFgDim))
 
 	for _, bind := range bindings {
 		b.WriteString(keyStyle.Render(bind.key))
@@ -965,7 +944,107 @@ func (m Model) helpView() string {
 	}
 
 	b.WriteString("\n")
-	b.WriteString(lipgloss.NewStyle().Foreground(lipgloss.Color("#565f89")).PaddingLeft(2).Render("Press ? to return"))
+	b.WriteString(lipgloss.NewStyle().Foreground(lipgloss.Color(colorComment)).PaddingLeft(2).Render("Press ? to return"))
 
 	return b.String()
+}
+
+// --- Git ---
+
+func gitRefreshTick() tea.Cmd {
+	return tea.Tick(2*time.Second, func(t time.Time) tea.Msg {
+		return gitRefreshMsg{}
+	})
+}
+
+func fetchGitInfo(path string) tea.Cmd {
+	return func() tea.Msg {
+		return gitInfoMsg{
+			branch:     getGitBranch(path),
+			fileStatus: getGitFileStatus(path),
+		}
+	}
+}
+
+func getGitBranch(path string) string {
+	// Try rev-parse first (works when there are commits)
+	for _, args := range [][]string{
+		{"rev-parse", "--abbrev-ref", "HEAD"},
+		{"symbolic-ref", "--short", "HEAD"}, // fallback for repos with no commits
+	} {
+		cmd := exec.Command("git", append([]string{"-C", path}, args...)...)
+		if out, err := cmd.Output(); err == nil {
+			if branch := strings.TrimSpace(string(out)); branch != "" {
+				return branch
+			}
+		}
+	}
+	return ""
+}
+
+
+
+func getGitFileStatus(path string) map[string]gitFileStatus {
+	out, err := exec.Command("git", "-C", path, "status", "--porcelain").Output()
+	if err != nil {
+		return nil
+	}
+	result := make(map[string]gitFileStatus)
+	for _, line := range strings.Split(strings.TrimSpace(string(out)), "\n") {
+		if len(line) < 4 {
+			continue
+		}
+		x, y := line[0], line[1]
+		file := strings.TrimSpace(line[3:])
+		// Handle renames: "R  old -> new"
+		if idx := strings.Index(file, " -> "); idx >= 0 {
+			file = file[idx+4:]
+		}
+
+		var status gitFileStatus
+		switch {
+		case x == '?' || y == '?':
+			status = gitUntracked
+		case x == 'D' || y == 'D':
+			status = gitDeleted
+		case x == 'A' || x == '?':
+			status = gitAdded
+		case x == 'M' || y == 'M' || x == 'R':
+			status = gitModified
+		default:
+			status = gitModified
+		}
+		result[file] = status
+
+		// Propagate to parent directories
+		dir := file
+		for {
+			dir = parentDir(dir)
+			if dir == "" {
+				break
+			}
+			// Dirs get the highest-priority status of their children
+			if existing, ok := result[dir]; !ok || status > existing {
+				result[dir] = status
+			}
+		}
+	}
+	return result
+}
+
+func parentDir(path string) string {
+	if i := strings.LastIndexByte(path, '/'); i > 0 {
+		return path[:i]
+	}
+	return ""
+}
+
+// --- Utility ---
+
+func flattenSkipRoot(root *tree.Node) []*tree.Node {
+	all := tree.Flatten(root)
+	if len(all) > 1 {
+		return all[1:]
+	}
+	return all
 }

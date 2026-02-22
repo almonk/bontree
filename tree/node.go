@@ -20,20 +20,14 @@ type Node struct {
 	Loaded   bool // whether children have been loaded
 }
 
-// Hidden files/dirs to skip
+// Non-dot dirs to always skip unless ShowHidden is on
 var defaultHidden = map[string]bool{
-	".git":          true,
-	"node_modules":  true,
-	".DS_Store":     true,
-	"__pycache__":   true,
-	".next":         true,
-	".cache":        true,
-	".vscode":       true,
-	".idea":         true,
+	"node_modules": true,
+	"__pycache__":  true,
 }
 
 // ShowHidden controls whether hidden/ignored files are displayed
-var ShowHidden = false
+var ShowHidden = true
 
 // BuildTree creates a tree from a root path (only loads top level initially)
 func BuildTree(rootPath string) (*Node, error) {
@@ -81,8 +75,8 @@ func loadChildren(node *Node) error {
 	for _, entry := range entries {
 		name := entry.Name()
 
-		// Skip hidden defaults unless ShowHidden is on
-		if !ShowHidden && defaultHidden[name] {
+		// Skip dot files and default hidden dirs unless ShowHidden is on
+		if !ShowHidden && (strings.HasPrefix(name, ".") || defaultHidden[name]) {
 			continue
 		}
 
@@ -201,41 +195,4 @@ func (n *Node) IsLastChild() bool {
 	}
 	children := n.Parent.Children
 	return len(children) > 0 && children[len(children)-1] == n
-}
-
-// GetTreePrefix returns the tree drawing characters for this node
-func (n *Node) GetTreePrefix() string {
-	if n.Depth == 0 {
-		return ""
-	}
-
-	// Build prefix from bottom up
-	var parts []string
-
-	// Current level connector
-	if n.IsLastChild() {
-		parts = append(parts, "└─")
-	} else {
-		parts = append(parts, "├─")
-	}
-
-	// Walk up to build indentation
-	parent := n.Parent
-	current := n
-	for parent != nil && parent.Depth > 0 {
-		if current.Parent != nil && !current.Parent.IsLastChild() {
-			parts = append(parts, "│ ")
-		} else {
-			parts = append(parts, "  ")
-		}
-		current = parent
-		parent = parent.Parent
-	}
-
-	// Reverse
-	for i, j := 0, len(parts)-1; i < j; i, j = i+1, j-1 {
-		parts[i], parts[j] = parts[j], parts[i]
-	}
-
-	return strings.Join(parts, "")
 }
