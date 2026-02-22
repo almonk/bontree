@@ -95,6 +95,47 @@ func (m Model) renderNode(node *tree.Node, selected bool, maxWidth int) string {
 		dirPath = strings.TrimPrefix(node.Parent.Path, "./")
 	}
 
+	// Calculate available width for name (+ dirPath) and truncate if needed
+	// Layout: " " + prefix + icon + " " + name [+ "  " + dirPath]
+	prefixWidth := lipgloss.Width(prefix)
+	iconWidth := lipgloss.Width(icon)
+	fixedWidth := 1 + prefixWidth + iconWidth + 1
+	available := maxWidth - fixedWidth
+	if available < 4 {
+		available = 4
+	}
+
+	displayName := node.Name
+	nameIndices := matchIndices
+	displayDirPath := dirPath
+	pathIndices := m.searchPathIndices[node]
+
+	if dirPath != "" {
+		// "  " separator costs 2 columns
+		nameWidth := runeLen(displayName)
+		dirWidth := runeLen(displayDirPath)
+		total := nameWidth + 2 + dirWidth
+		if total > available {
+			// Truncate dirPath first, then name if still needed
+			dirAlloc := available - nameWidth - 2
+			if dirAlloc < 3 {
+				dirAlloc = 3
+			}
+			if dirWidth > dirAlloc {
+				displayDirPath, pathIndices = middleTruncate(displayDirPath, dirAlloc, pathIndices)
+			}
+			nameAlloc := available - 2 - runeLen(displayDirPath)
+			if nameAlloc < 4 {
+				nameAlloc = 4
+			}
+			if nameWidth > nameAlloc {
+				displayName, nameIndices = middleTruncate(displayName, nameAlloc, nameIndices)
+			}
+		}
+	} else if runeLen(displayName) > available {
+		displayName, nameIndices = middleTruncate(displayName, available, nameIndices)
+	}
+
 	if selected {
 		treeLineSelectedStyle := treeLineStyle.Background(lipgloss.Color(colorSelection))
 		var parts []string
@@ -103,10 +144,10 @@ func (m Model) renderNode(node *tree.Node, selected bool, maxWidth int) string {
 			parts = append(parts, treeLineSelectedStyle.Render(prefix))
 		}
 		parts = append(parts, selectedStyle.Render(icon+" "))
-		parts = append(parts, m.renderNameHighlighted(node.Name, matchIndices, selectedStyle, matchHighlightSelectedStyle))
-		if dirPath != "" {
+		parts = append(parts, m.renderNameHighlighted(displayName, nameIndices, selectedStyle, matchHighlightSelectedStyle))
+		if displayDirPath != "" {
 			parts = append(parts, flatPathSelectedStyle.Render("  "))
-			parts = append(parts, m.renderNameHighlighted(dirPath, m.searchPathIndices[node], flatPathSelectedStyle, matchHighlightSelectedStyle))
+			parts = append(parts, m.renderNameHighlighted(displayDirPath, pathIndices, flatPathSelectedStyle, matchHighlightSelectedStyle))
 		}
 
 		if plainLen := lipgloss.Width(strings.Join(parts, "")); plainLen < maxWidth {
@@ -123,10 +164,10 @@ func (m Model) renderNode(node *tree.Node, selected bool, maxWidth int) string {
 
 	iconStyle, nameStyle := m.gitNodeStyles(node)
 	parts = append(parts, iconStyle.Render(icon)+" ")
-	parts = append(parts, m.renderNameHighlighted(node.Name, matchIndices, nameStyle, matchHighlightStyle))
-	if dirPath != "" {
+	parts = append(parts, m.renderNameHighlighted(displayName, nameIndices, nameStyle, matchHighlightStyle))
+	if displayDirPath != "" {
 		parts = append(parts, flatPathStyle.Render("  "))
-		parts = append(parts, m.renderNameHighlighted(dirPath, m.searchPathIndices[node], flatPathStyle, matchHighlightStyle))
+		parts = append(parts, m.renderNameHighlighted(displayDirPath, pathIndices, flatPathStyle, matchHighlightStyle))
 	}
 
 	return strings.Join(parts, "")
@@ -213,6 +254,43 @@ func (m Model) getDisplayPrefix(node *tree.Node, displayDepth int) string {
 	}
 
 	return strings.Join(parts, "")
+}
+
+// runeLen returns the number of runes in a string.
+func runeLen(s string) int {
+	return len([]rune(s))
+}
+
+// middleTruncate truncates a string in the middle with "…" if it exceeds maxWidth runes.
+// It also remaps match indices to their new positions in the truncated string.
+func middleTruncate(s string, maxWidth int, indices []int) (string, []int) {
+	runes := []rune(s)
+	if len(runes) <= maxWidth {
+		return s, indices
+	}
+	if maxWidth <= 1 {
+		return "…", nil
+	}
+
+	rightLen := (maxWidth - 1) / 2
+	leftLen := maxWidth - 1 - rightLen
+	truncated := string(runes[:leftLen]) + "…" + string(runes[len(runes)-rightLen:])
+
+	if len(indices) == 0 {
+		return truncated, nil
+	}
+
+	rightStart := len(runes) - rightLen
+	var remapped []int
+	for _, idx := range indices {
+		if idx < leftLen {
+			remapped = append(remapped, idx)
+		} else if idx >= rightStart {
+			remapped = append(remapped, leftLen+1+(idx-rightStart))
+		}
+		// Indices in the truncated middle are dropped
+	}
+	return truncated, remapped
 }
 
 // --- Help ---
