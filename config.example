@@ -5,9 +5,8 @@
 # Comments start with `#` and are only valid on their own line.
 # Blank lines are ignored.
 #
-# When you specify ANY keybind line, all default keybindings are cleared
-# and only your specified bindings will be active. This gives you full
-# control over every keybinding.
+# Keybindings are additive — your bindings are merged with the defaults.
+# Use "unbind" to remove a default binding you don't want.
 
 # --- General settings ---
 

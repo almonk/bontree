@@ -56,9 +56,9 @@ keybind = x=expand_all
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	// When keybinds are present, defaults are cleared
-	if cfg.ActionFor("G") != "" {
-		t.Error("expected G to be unbound when user provides keybinds")
+	// Keybinds are additive — defaults remain unless explicitly unbound
+	if cfg.ActionFor("G") != ActionGoBottom {
+		t.Errorf("expected G to keep default (go_bottom), got %q", cfg.ActionFor("G"))
 	}
 
 	if cfg.ActionFor("q") != ActionQuit {

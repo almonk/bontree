@@ -131,10 +131,6 @@ func LoadFrom(path string) (*Config, error) {
 	}
 	defer f.Close()
 
-	// Track if we've seen any keybind lines. If so, we start fresh —
-	// user keybinds fully replace defaults (Ghostty-style override).
-	keybindSeen := false
-
 	scanner := bufio.NewScanner(f)
 	lineNum := 0
 	for scanner.Scan() {
@@ -161,11 +157,6 @@ func LoadFrom(path string) (*Config, error) {
 
 		switch key {
 		case "keybind":
-			if !keybindSeen {
-				// First keybind line: clear all defaults so user has full control
-				cfg.Keybinds = make(map[string]Action)
-				keybindSeen = true
-			}
 			if err := parseKeybind(cfg, value, path, lineNum); err != nil {
 				return nil, err
 			}
