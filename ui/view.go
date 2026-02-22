@@ -147,11 +147,11 @@ func (m Model) renderNode(node *tree.Node, selected bool, maxWidth int) string {
 		parts = append(parts, m.renderNameHighlighted(displayName, nameIndices, selectedStyle, matchHighlightSelectedStyle))
 
 		if displayDirPath != "" {
-			// Right-align the dir path
+			// Place dir path at 50% column
 			leftWidth := lipgloss.Width(strings.Join(parts, ""))
 			dirRendered := m.renderNameHighlighted(displayDirPath, pathIndices, flatPathSelectedStyle, matchHighlightSelectedStyle)
-			dirWidth := lipgloss.Width(dirRendered)
-			gap := maxWidth - leftWidth - dirWidth
+			halfCol := maxWidth / 2
+			gap := halfCol - leftWidth
 			if gap < 2 {
 				gap = 2
 			}
@@ -176,11 +176,11 @@ func (m Model) renderNode(node *tree.Node, selected bool, maxWidth int) string {
 	parts = append(parts, m.renderNameHighlighted(displayName, nameIndices, nameStyle, matchHighlightStyle))
 
 	if displayDirPath != "" {
-		// Right-align the dir path
+		// Place dir path at 50% column
 		leftWidth := lipgloss.Width(strings.Join(parts, ""))
 		dirRendered := m.renderNameHighlighted(displayDirPath, pathIndices, flatPathStyle, matchHighlightStyle)
-		dirWidth := lipgloss.Width(dirRendered)
-		gap := maxWidth - leftWidth - dirWidth
+		halfCol := maxWidth / 2
+		gap := halfCol - leftWidth
 		if gap < 2 {
 			gap = 2
 		}
