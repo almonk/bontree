@@ -67,6 +67,12 @@ func (m Model) renderStatusBar() string {
 	var left string
 	if m.flashMsg != "" {
 		left = statusFlashStyle.Render(" " + m.flashMsg)
+	} else if m.filtered {
+		label := "filter"
+		if m.flatSearch {
+			label = "find"
+		}
+		left = statusFilterTagStyle.Render(fmt.Sprintf(" %s: %s ", label, m.searchQuery))
 	} else if m.gitBranch != "" {
 		left = statusBranchStyle.Render(fmt.Sprintf(" \ue725 %s", m.gitBranch))
 	}

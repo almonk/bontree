@@ -80,6 +80,11 @@ var (
 	statusFlashStyle  = statusBase.Foreground(colorGreen).Bold(true).PaddingLeft(1)
 	statusHelpStyle   = statusBase.Foreground(colorGutter)
 
+	statusFilterTagStyle = lipgloss.NewStyle().
+				Background(colorCyan).
+				Foreground(lipgloss.Color("0")).
+				Bold(true)
+
 	searchInputStyle  = statusBase.Foreground(colorFg).PaddingLeft(1)
 	searchPromptStyle = statusBase.Foreground(colorBlue).Bold(true).PaddingLeft(1)
 )
