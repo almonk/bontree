@@ -6,8 +6,8 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/alasdairmonk/bontree/config"
-	"github.com/alasdairmonk/bontree/tree"
+	"github.com/almonk/bontree/config"
+	"github.com/almonk/bontree/tree"
 	"github.com/atotto/clipboard"
 	tea "github.com/charmbracelet/bubbletea"
 )

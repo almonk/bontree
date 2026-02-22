@@ -5,9 +5,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/alasdairmonk/bontree/config"
-	"github.com/alasdairmonk/bontree/icons"
-	"github.com/alasdairmonk/bontree/tree"
+	"github.com/almonk/bontree/config"
+	"github.com/almonk/bontree/icons"
+	"github.com/almonk/bontree/tree"
 	"github.com/charmbracelet/lipgloss"
 )
 

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/alasdairmonk/bontree/config"
-	"github.com/alasdairmonk/bontree/theme"
-	"github.com/alasdairmonk/bontree/ui"
+	"github.com/almonk/bontree/config"
+	"github.com/almonk/bontree/theme"
+	"github.com/almonk/bontree/ui"
 	tea "github.com/charmbracelet/bubbletea"
 )
 

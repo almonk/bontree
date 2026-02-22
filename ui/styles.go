@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"github.com/alasdairmonk/bontree/theme"
+	"github.com/almonk/bontree/theme"
 	"github.com/charmbracelet/lipgloss"
 )
 

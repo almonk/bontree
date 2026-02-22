@@ -1,4 +1,4 @@
-module github.com/alasdairmonk/bontree
+module github.com/almonk/bontree
 
 go 1.25.0
 

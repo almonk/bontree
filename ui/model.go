@@ -3,8 +3,8 @@ package ui
 import (
 	"time"
 
-	"github.com/alasdairmonk/bontree/config"
-	"github.com/alasdairmonk/bontree/tree"
+	"github.com/almonk/bontree/config"
+	"github.com/almonk/bontree/tree"
 	tea "github.com/charmbracelet/bubbletea"
 )
 

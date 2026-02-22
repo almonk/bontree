@@ -1,8 +1,8 @@
 package ui
 
 import (
-	"github.com/alasdairmonk/bontree/config"
-	"github.com/alasdairmonk/bontree/tree"
+	"github.com/almonk/bontree/config"
+	"github.com/almonk/bontree/tree"
 )
 
 // NewDemo creates a Model from a pre-built tree root for demo/WASM use.

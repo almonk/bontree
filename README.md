@@ -23,7 +23,7 @@ https://github.com/user-attachments/assets/0e987772-826c-4f30-bd7f-d44cbf69547a
 ## Install
 
 ```bash
-go install github.com/alasdairmonk/bontree@latest
+go install github.com/almonk/bontree@latest
 ```
 
 Or build from source:

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/alasdairmonk/bontree/tree"
+	"github.com/almonk/bontree/tree"
 	tea "github.com/charmbracelet/bubbletea"
 )
 

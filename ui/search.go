@@ -3,7 +3,7 @@ package ui
 import (
 	"strings"
 
-	"github.com/alasdairmonk/bontree/tree"
+	"github.com/almonk/bontree/tree"
 	"github.com/sahilm/fuzzy"
 )
 
