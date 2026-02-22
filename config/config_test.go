@@ -177,6 +177,26 @@ func TestKeysFor(t *testing.T) {
 	}
 }
 
+func TestSpaceKeybind(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "config")
+
+	content := `keybind = space=toggle
+`
+	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	cfg, err := LoadFrom(path)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if cfg.ActionFor(" ") != ActionToggle {
+		t.Errorf("expected space=toggle, got %q", cfg.ActionFor(" "))
+	}
+}
+
 func TestCommentsAndBlankLines(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "config")

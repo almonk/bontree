@@ -190,13 +190,20 @@ func LoadFrom(path string) (*Config, error) {
 
 // parseKeybind parses a keybind value like "ctrl+c=quit" or "unbind=j".
 func parseKeybind(cfg *Config, value string, path string, lineNum int) error {
-	eqIdx := strings.Index(value, "=")
+	// Find the last '=' to split key from action, since the key itself
+	// could be '=' or contain '=' in theory.
+	eqIdx := strings.LastIndex(value, "=")
 	if eqIdx < 0 {
 		return fmt.Errorf("%s:%d: invalid keybind syntax (expected key=action): %s", path, lineNum, value)
 	}
 
 	bindKey := strings.TrimSpace(value[:eqIdx])
 	actionStr := strings.TrimSpace(value[eqIdx+1:])
+
+	// Support "space" as a named key for the space character
+	if bindKey == "space" {
+		bindKey = " "
+	}
 
 	if bindKey == "" {
 		return fmt.Errorf("%s:%d: empty keybind key", path, lineNum)

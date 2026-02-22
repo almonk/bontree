@@ -123,7 +123,7 @@ Search mode also supports: `search_confirm`, `search_cancel`, `search_backspace`
 
 ### Key names
 
-Letters and symbols are used as-is (`a`, `G`, `/`, `?`, `.`). Special keys: `up`, `down`, `left`, `right`, `enter`, `esc`, `backspace`, `tab`, ` ` (space). Modifiers use `+`: `ctrl+c`, `ctrl+d`, `ctrl+f`, `ctrl+u`.
+Letters and symbols are used as-is (`a`, `G`, `/`, `?`, `.`). Special keys: `up`, `down`, `left`, `right`, `enter`, `esc`, `backspace`, `tab`, `space`. Modifiers use `+`: `ctrl+c`, `ctrl+d`, `ctrl+f`, `ctrl+u`.
 
 A fully commented example config is available in [`config.example`](config.example).
 
