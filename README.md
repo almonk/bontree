@@ -1,6 +1,6 @@
 # bontree
 
-A file explorer for your agents.
+A file explorer to pair with your favourite agent.
 
 A fast, interactive terminal file explorer with fuzzy search, git integration, and Nerd Font icons. Built with Go and [Bubble Tea](https://github.com/charmbracelet/bubbletea).
 
@@ -10,6 +10,8 @@ A fast, interactive terminal file explorer with fuzzy search, git integration, a
 - **Fuzzy search** — hierarchy-aware search (`/`) that auto-expands matching ancestors, or flat file search (`Ctrl+f`) across all files
 - **Git status** — files colored by status (modified, added, deleted, untracked, ignored) with branch display in the status bar
 - **Nerd Font icons** — language and filetype-specific icons for 50+ file types
+- **Theming** — use any Ghostty-compatible theme, or inherit your terminal's colors
+- **Configurable keybindings** — remap every key or strip down to a minimal layout
 - **Clipboard** — copy relative file paths with `c`
 - **Hidden files** — toggle visibility with `.`
 - **Mouse support** — scroll, click to select, double-click to toggle directories
@@ -37,6 +39,8 @@ Defaults to the current directory if no path is given.
 
 ## Keybindings
 
+Every keybinding listed below is a default — all of them can be remapped or removed in the [config file](#configuration).
+
 | Key | Action |
 |-----|--------|
 | `j` / `↓` | Move down |
@@ -59,44 +63,38 @@ Defaults to the current directory if no path is given.
 
 **In search mode:** type to filter, `↑`/`↓` to navigate results, `←`/`→` to jump between matches, `Enter` to confirm, `Esc` to cancel.
 
-All keybindings can be overridden via the [config file](#configuration).
-
 ## Configuration
 
 Bontree uses a Ghostty-style config file at `~/.config/bontree/config` (respects `$XDG_CONFIG_HOME`).
 
-The syntax is `key = value`. Comments start with `#` and must be on their own line. Blank lines are ignored.
-
-```
-# ~/.config/bontree/config
-
-# Show hidden files by default
-show-hidden = true
-
-# Keybindings use the format: keybind = <key>=<action>
-keybind = q=quit
-keybind = ctrl+c=quit
-keybind = j=move_down
-keybind = down=move_down
-keybind = k=move_up
-keybind = up=move_up
-```
-
-> **Note:** When you add _any_ `keybind` line, all default keybindings are cleared and only your specified bindings will be active. This gives you full control — there are no hidden bindings you can't remove.
-
-To remove a single binding, use `unbind`:
-
-```
-keybind = q=unbind
-```
+The syntax is `key = value`. Comments start with `#` and must be on their own line. Blank lines are ignored. A fully commented example is available in [`config.example`](config.example).
 
 ### Settings
 
 | Key | Values | Default | Description |
 |-----|--------|---------|-------------|
 | `show-hidden` | `true` / `false` | `false` | Show hidden files (dotfiles) on startup |
+| `theme` | theme name | *(unset)* | Ghostty-compatible color theme (see [Theming](#theming)) |
 
-### Available actions
+### Custom keybindings
+
+Keybindings are configured with `keybind = <key>=<action>`. Your bindings are merged with the defaults — you only need to specify what you want to change.
+
+```
+# ~/.config/bontree/config
+
+# Remap a key
+keybind = ctrl+q=quit
+
+# Remove a binding you don't want
+keybind = q=unbind
+```
+
+#### Key names
+
+Letters and symbols are used as-is (`a`, `G`, `/`, `?`, `.`). Special keys: `up`, `down`, `left`, `right`, `enter`, `esc`, `backspace`, `tab`, `space`. Modifiers use `+`: `ctrl+c`, `ctrl+d`, `ctrl+f`, `ctrl+u`.
+
+#### Available actions
 
 | Action | Description |
 |--------|-------------|
@@ -121,11 +119,33 @@ keybind = q=unbind
 
 Search mode also supports: `search_confirm`, `search_cancel`, `search_backspace`, `search_next_match`, `search_prev_match`.
 
-### Key names
+### Theming
 
-Letters and symbols are used as-is (`a`, `G`, `/`, `?`, `.`). Special keys: `up`, `down`, `left`, `right`, `enter`, `esc`, `backspace`, `tab`, `space`. Modifiers use `+`: `ctrl+c`, `ctrl+d`, `ctrl+f`, `ctrl+u`.
+Bontree can load Ghostty-compatible theme files for consistent colors across tools. By default it inherits your terminal's colors; set `theme` in your config to override:
 
-A fully commented example config is available in [`config.example`](config.example).
+```
+# ~/.config/bontree/config
+theme = Catppuccin Mocha
+```
+
+Themes are searched in order:
+
+1. `~/.config/bontree/themes/<name>` — your own custom themes
+2. `/Applications/Ghostty.app/Contents/Resources/ghostty/themes/<name>` — bundled Ghostty themes (macOS)
+3. `~/.config/ghostty/themes/<name>` — Ghostty user themes
+
+If you already use Ghostty, your themes are picked up automatically. To add a custom theme, drop a file in `~/.config/bontree/themes/` using the standard format:
+
+```
+palette = 0=#1a1b26
+palette = 1=#f7768e
+# ... indices 0-15
+background = #1a1b26
+foreground = #c0caf5
+selection-background = #33467c
+selection-foreground = #c0caf5
+cursor-color = #c0caf5
+```
 
 ## Requirements
 
