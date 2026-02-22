@@ -66,11 +66,10 @@ func (m Model) renderStatusBar() string {
 	var modeLabel string
 	var modeBg lipgloss.TerminalColor
 	if m.filtered || m.searching {
+		modeLabel = "FILTER"
 		if m.flatSearch {
-			modeLabel = "FLAT"
 			modeBg = colorOrange
 		} else {
-			modeLabel = "FILTER"
 			modeBg = colorPurple
 		}
 	} else {
