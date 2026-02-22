@@ -6,6 +6,8 @@ Bontree is a fast, interactive terminal file explorer with fuzzy search, git int
 
 Ideal for making sense of changes from coding agents — see git status at a glance to understand what's been modified — and for quickly finding files to copy paths into prompts.
 
+https://github.com/user-attachments/assets/1f74612f-c1bc-4834-a1a6-4292b03e2706
+
 ## Features
 
 - **Tree navigation** — expand, collapse, and browse directories with keyboard or mouse
