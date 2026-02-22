@@ -28,8 +28,26 @@
 </script>
 
 <svelte:head>
-  <title>bontree</title>
-  <meta name="description" content="A fast, interactive terminal file explorer for coding agents." />
+  <title>bontree | Pretty + fast file tree for agent UIs</title>
+  <meta name="description" content="bontree is a pretty, fast terminal file tree built to pair with agent-driven coding workflows." />
+  <meta name="keywords" content="bontree,file tree,terminal ui,cli,go,coding agent,developer tools" />
+  <meta name="author" content="Alasdair Monk" />
+  <meta name="robots" content="index,follow" />
+  <meta name="theme-color" content="#1a1b26" />
+  <meta name="application-name" content="bontree" />
+  <meta name="apple-mobile-web-app-title" content="bontree" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="bontree" />
+  <meta property="og:title" content="bontree | Pretty + fast file tree for agent UIs" />
+  <meta property="og:description" content="A pretty, fast terminal file tree built to pair with agent-driven coding workflows." />
+  <meta property="og:url" content="https://github.com/almonk/bontree" />
+  <meta property="og:image" content="/favicon.ico" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="bontree | Pretty + fast file tree for agent UIs" />
+  <meta name="twitter:description" content="A pretty, fast terminal file tree built to pair with agent-driven coding workflows." />
+  <meta name="twitter:image" content="/favicon.ico" />
 </svelte:head>
 
 <div class="wrapper">
