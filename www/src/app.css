@@ -1,0 +1,45 @@
+@font-face {
+  font-family: 'Maple Mono NF';
+  src: url('/fonts/MapleMono-NF-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Maple Mono NF';
+  src: url('/fonts/MapleMono-NF-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --bg: #1a1b26;
+  --bg-lighter: #1f2335;
+  --bg-card: #24283b;
+  --fg: #c0caf5;
+  --fg-dim: #9aa5ce;
+  --fg-muted: #565f89;
+  --accent: #7aa2f7;
+  --border: #292e42;
+  --selection: #33467c;
+  --radius: 12px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Maple Mono NF', 'SF Mono', 'Fira Code', monospace;
+  background: var(--bg);
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

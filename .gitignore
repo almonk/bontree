@@ -1,1 +1,4 @@
 bontree
+www/node_modules/
+www/.svelte-kit/
+www-old/
