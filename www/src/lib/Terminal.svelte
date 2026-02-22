@@ -8,6 +8,7 @@
   };
 
   let containerEl: HTMLDivElement;
+  let reservedHeightPx = 360;
 
   function clamp(value: number, min: number, max: number): number {
     return Math.max(min, Math.min(value, max));
@@ -28,7 +29,7 @@
     const cellHeight = isMobile ? 14 : 16;
     const rows = clamp(Math.floor((viewportHeight - chromeHeight) / cellHeight), 16, 28);
 
-    return { cols, rows, fontSize };
+    return { cols, rows, fontSize, cellHeight };
   }
 
   onMount(() => {
@@ -38,6 +39,10 @@
     let removeMouseHandlers: (() => void) | null = null;
 
     const start = async () => {
+      const initialSize = getInitialTerminalSize(containerEl);
+      // Reserve exact terminal footprint before async JS/WASM work to avoid layout pop-in.
+      reservedHeightPx = initialSize.rows * initialSize.cellHeight + 8;
+
       const { Terminal } = await import('@xterm/xterm');
       await import('@xterm/xterm/css/xterm.css');
       if (disposed) return;
@@ -51,7 +56,7 @@
       if (disposed) return;
       go.run(result.instance);
 
-      const { cols, rows, fontSize } = getInitialTerminalSize(containerEl);
+      const { cols, rows, fontSize } = initialSize;
 
       term = new Terminal({
         rows,
@@ -198,7 +203,7 @@
   });
 </script>
 
-<div class="terminal-wrapper">
+<div class="terminal-wrapper" style={`min-height: ${reservedHeightPx}px`}>
   <div class="terminal" bind:this={containerEl}></div>
 </div>
 
