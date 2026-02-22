@@ -8,7 +8,7 @@
   };
 
   let containerEl: HTMLDivElement;
-  let reservedHeightPx = 360;
+  let reservedHeightPx = 512;
 
   function clamp(value: number, min: number, max: number): number {
     return Math.max(min, Math.min(value, max));
@@ -29,7 +29,7 @@
     const cellHeight = isMobile ? 14 : 16;
     const rows = clamp(Math.floor((viewportHeight - chromeHeight) / cellHeight), 16, 28);
 
-    return { cols, rows, fontSize, cellHeight };
+    return { cols, rows, fontSize };
   }
 
   onMount(() => {
@@ -40,8 +40,6 @@
 
     const start = async () => {
       const initialSize = getInitialTerminalSize(containerEl);
-      // Reserve exact terminal footprint before async JS/WASM work to avoid layout pop-in.
-      reservedHeightPx = initialSize.rows * initialSize.cellHeight + 8;
 
       const { Terminal } = await import('@xterm/xterm');
       await import('@xterm/xterm/css/xterm.css');
