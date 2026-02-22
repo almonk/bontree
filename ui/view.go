@@ -165,11 +165,7 @@ func (m Model) renderNode(node *tree.Node, selected bool, maxWidth int) string {
 	// Layout: " " + prefix + icon + " " + name [+ "  " + dirPath]
 	prefixWidth := lipgloss.Width(prefix)
 	iconWidth := lipgloss.Width(icon)
-	thinSpace := 0
-	if prefixWidth > 0 {
-		thinSpace = 1 // \u2009 between prefix and icon
-	}
-	fixedWidth := 1 + prefixWidth + thinSpace + iconWidth + 1
+	fixedWidth := 1 + prefixWidth + iconWidth + 1
 	available := maxWidth - fixedWidth
 	if available < 4 {
 		available = 4
@@ -211,7 +207,7 @@ func (m Model) renderNode(node *tree.Node, selected bool, maxWidth int) string {
 		var parts []string
 		parts = append(parts, selectedStyle.Render(" "))
 		if prefix != "" {
-			parts = append(parts, treeLineSelectedStyle.Render(prefix)+selectedStyle.Render("\u2009"))
+			parts = append(parts, treeLineSelectedStyle.Render(prefix))
 		}
 		parts = append(parts, selectedStyle.Render(icon+" "))
 		parts = append(parts, m.renderNameHighlighted(displayName, nameIndices, selectedStyle, matchHighlightSelectedStyle))
@@ -237,7 +233,7 @@ func (m Model) renderNode(node *tree.Node, selected bool, maxWidth int) string {
 	var parts []string
 	parts = append(parts, " ")
 	if prefix != "" {
-		parts = append(parts, treeLineStyle.Render(prefix)+"\u2009")
+		parts = append(parts, treeLineStyle.Render(prefix))
 	}
 
 	iconStyle, nameStyle := m.gitNodeStyles(node)
