@@ -14,6 +14,17 @@
 # Show hidden files (dotfiles) by default.
 # show-hidden = false
 
+# Theme to use. When set, overrides terminal colors with a Ghostty-compatible
+# theme. Themes are searched in:
+#   1. ~/.config/bontree/themes/<name>
+#   2. /Applications/Ghostty.app/Contents/Resources/ghostty/themes/<name> (macOS)
+#   3. ~/.config/ghostty/themes/<name>
+#
+# Leave unset or empty to inherit colors from your terminal.
+# theme = TokyoNight
+# theme = Catppuccin Mocha
+# theme = Dracula
+
 # --- Keybindings ---
 #
 # Keybinds use the format: keybind = <key>=<action>

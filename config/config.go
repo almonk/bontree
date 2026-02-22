@@ -46,6 +46,10 @@ type Config struct {
 
 	// ShowHidden controls whether hidden files are shown by default.
 	ShowHidden bool
+
+	// Theme is the name of a Ghostty-compatible theme to use.
+	// Empty string means inherit from the terminal.
+	Theme string
 }
 
 // DefaultConfig returns the config with all default keybindings.
@@ -175,6 +179,9 @@ func LoadFrom(path string) (*Config, error) {
 			default:
 				return nil, fmt.Errorf("%s:%d: show-hidden must be true or false, got %q", path, lineNum, value)
 			}
+
+		case "theme":
+			cfg.Theme = value
 
 		default:
 			return nil, fmt.Errorf("%s:%d: unknown config key %q", path, lineNum, key)

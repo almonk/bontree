@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/alasdairmonk/bontree/config"
+	"github.com/alasdairmonk/bontree/theme"
 	"github.com/alasdairmonk/bontree/ui"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -38,6 +39,16 @@ func main() {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Config error: %s\n", err)
 		os.Exit(1)
+	}
+
+	// Load theme if configured
+	if cfg.Theme != "" {
+		t, err := theme.Load(cfg.Theme)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Theme error: %s\n", err)
+			os.Exit(1)
+		}
+		ui.ApplyTheme(t)
 	}
 
 	model, err := ui.New(path, cfg)

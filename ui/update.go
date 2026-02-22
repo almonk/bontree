@@ -87,10 +87,17 @@ func (m Model) updateMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) updateSearchMode(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	// In search mode, printable characters are always typed into the query —
+	// never dispatched as normal-mode actions (e.g. j/k/g/G/q).
+	if msg.Type == tea.KeyRunes {
+		m.searchQuery += msg.String()
+		m.applySearchFilter()
+		return m, nil
+	}
+
 	key := msg.String()
 	action := m.cfg.ActionFor(key)
 
-	// Search mode has its own action set plus hardcoded essentials
 	switch {
 	case key == "esc" || action == config.ActionSearchCancel:
 		if m.searchQuery == "" {
@@ -130,10 +137,10 @@ func (m Model) updateSearchMode(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case action == config.ActionQuit:
 		return m, tea.Quit
 
-	case action == config.ActionMoveDown:
+	case action == config.ActionMoveDown || key == "down":
 		m.moveCursor(1)
 
-	case action == config.ActionMoveUp:
+	case action == config.ActionMoveUp || key == "up":
 		m.moveCursor(-1)
 
 	case action == config.ActionSearchNextMatch:
@@ -141,12 +148,6 @@ func (m Model) updateSearchMode(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 	case action == config.ActionSearchPrevMatch:
 		m.jumpToMatch(-1)
-
-	default:
-		if msg.Type == tea.KeyRunes {
-			m.searchQuery += msg.String()
-			m.applySearchFilter()
-		}
 	}
 
 	return m, nil
