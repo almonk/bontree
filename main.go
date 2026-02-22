@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/alasdairmonk/bontree/config"
 	"github.com/alasdairmonk/bontree/ui"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -33,7 +34,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	model, err := ui.New(path)
+	cfg, err := config.Load()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Config error: %s\n", err)
+		os.Exit(1)
+	}
+
+	model, err := ui.New(path, cfg)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error building tree: %s\n", err)
 		os.Exit(1)

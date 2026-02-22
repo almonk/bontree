@@ -3,6 +3,7 @@ package ui
 import (
 	"time"
 
+	"github.com/alasdairmonk/bontree/config"
 	"github.com/alasdairmonk/bontree/tree"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -21,6 +22,7 @@ type Model struct {
 	gitBranch  string
 	gitFiles   map[string]gitFileStatus // relative path -> status
 	showHidden bool
+	cfg        *config.Config
 
 	// Mouse
 	lastClickTime time.Time
@@ -41,8 +43,13 @@ type Model struct {
 	savedScrollOff int
 }
 
-// New creates a new Model
-func New(rootPath string) (Model, error) {
+// New creates a new Model with the given config. If cfg is nil, defaults are used.
+func New(rootPath string, cfg *config.Config) (Model, error) {
+	if cfg == nil {
+		cfg = config.DefaultConfig()
+	}
+
+	tree.ShowHidden = cfg.ShowHidden
 	tree.RefreshGitIgnored(rootPath)
 	root, err := tree.BuildTree(rootPath)
 	if err != nil {
@@ -53,7 +60,8 @@ func New(rootPath string) (Model, error) {
 		root:       root,
 		flatNodes:  flattenTree(root),
 		rootPath:   rootPath,
-		showHidden: tree.ShowHidden,
+		showHidden: cfg.ShowHidden,
+		cfg:        cfg,
 	}, nil
 }
 

@@ -2,8 +2,10 @@ package ui
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
+	"github.com/alasdairmonk/bontree/config"
 	"github.com/alasdairmonk/bontree/icons"
 	"github.com/alasdairmonk/bontree/tree"
 	"github.com/charmbracelet/lipgloss"
@@ -66,10 +68,11 @@ func (m Model) renderStatusBar() string {
 	var modeLabel string
 	var modeBg lipgloss.TerminalColor
 	if m.filtered || m.searching {
-		modeLabel = "FILTER"
 		if m.flatSearch {
+			modeLabel = "FFIND"
 			modeBg = colorOrange
 		} else {
+			modeLabel = "FILTER"
 			modeBg = colorPurple
 		}
 	} else {
@@ -356,51 +359,99 @@ func middleTruncate(s string, maxWidth int, indices []int) (string, []int) {
 
 // --- Help ---
 
+// formatKeyName makes key names more readable for the help view.
+func formatKeyName(key string) string {
+	switch key {
+	case "up":
+		return "↑"
+	case "down":
+		return "↓"
+	case "left":
+		return "←"
+	case "right":
+		return "→"
+	case " ":
+		return "Space"
+	case "enter":
+		return "Enter"
+	case "esc":
+		return "Esc"
+	case "backspace":
+		return "Backspace"
+	}
+	// Capitalise ctrl+ shortcuts
+	if strings.HasPrefix(key, "ctrl+") {
+		return "Ctrl+" + strings.TrimPrefix(key, "ctrl+")
+	}
+	return key
+}
+
 func (m Model) helpView() string {
 	var b strings.Builder
 
 	b.WriteString(titleStyle.Render("  Keybindings"))
 	b.WriteString("\n\n")
 
-	bindings := []struct{ key, desc string }{
-		{"j / ↓", "Move down"},
-		{"k / ↑", "Move up"},
-		{"g", "Go to top"},
-		{"G", "Go to bottom"},
-		{"Ctrl+d", "Half page down"},
-		{"Ctrl+u", "Half page up"},
-		{"l / →", "Expand directory"},
-		{"h / ←", "Collapse directory / go to parent"},
-		{"Enter", "Toggle directory open/close"},
-		{"Space", "Toggle directory open/close"},
-		{"c", "Copy relative path to clipboard"},
-		{"E", "Expand all"},
-		{"W", "Collapse all"},
-		{"/", "Fuzzy search (tree)"},
-		{"Ctrl+f", "Flat file search"},
-		{".", "Toggle hidden files"},
-		{"?", "Toggle help"},
-		{"q / Ctrl+c", "Quit"},
+	// Action descriptions in display order
+	actionOrder := []struct {
+		action config.Action
+		desc   string
+	}{
+		{config.ActionMoveDown, "Move down"},
+		{config.ActionMoveUp, "Move up"},
+		{config.ActionGoTop, "Go to top"},
+		{config.ActionGoBottom, "Go to bottom"},
+		{config.ActionHalfPageDown, "Half page down"},
+		{config.ActionHalfPageUp, "Half page up"},
+		{config.ActionExpand, "Expand directory"},
+		{config.ActionCollapse, "Collapse directory / go to parent"},
+		{config.ActionToggle, "Toggle directory open/close"},
+		{config.ActionCopyPath, "Copy relative path to clipboard"},
+		{config.ActionExpandAll, "Expand all"},
+		{config.ActionCollapseAll, "Collapse all"},
+		{config.ActionSearch, "Fuzzy search (tree)"},
+		{config.ActionFlatSearch, "Flat file search"},
+		{config.ActionToggleHidden, "Toggle hidden files"},
+		{config.ActionClearFilter, "Clear filter"},
+		{config.ActionHelp, "Toggle help"},
+		{config.ActionQuit, "Quit"},
 	}
 
 	keyStyle := lipgloss.NewStyle().
 		Foreground(colorPurple).
 		Bold(true).
-		Width(16).
+		Width(20).
 		Align(lipgloss.Left).
 		PaddingLeft(2)
 
 	descStyle := lipgloss.NewStyle().
 		Foreground(colorFgDim)
 
-	for _, bind := range bindings {
-		b.WriteString(keyStyle.Render(bind.key))
-		b.WriteString(descStyle.Render(bind.desc))
+	for _, entry := range actionOrder {
+		keys := m.cfg.KeysFor(entry.action)
+		if len(keys) == 0 {
+			continue
+		}
+		// Sort for deterministic display
+		sort.Strings(keys)
+		formatted := make([]string, len(keys))
+		for i, k := range keys {
+			formatted[i] = formatKeyName(k)
+		}
+		b.WriteString(keyStyle.Render(strings.Join(formatted, " / ")))
+		b.WriteString(descStyle.Render(entry.desc))
 		b.WriteString("\n")
 	}
 
 	b.WriteString("\n")
-	b.WriteString(lipgloss.NewStyle().Foreground(colorComment).PaddingLeft(2).Render("Press ? to return"))
+
+	// Find the actual help key
+	helpKeys := m.cfg.KeysFor(config.ActionHelp)
+	helpHint := "Press ? to return"
+	if len(helpKeys) > 0 {
+		helpHint = fmt.Sprintf("Press %s to return", formatKeyName(helpKeys[0]))
+	}
+	b.WriteString(lipgloss.NewStyle().Foreground(colorComment).PaddingLeft(2).Render(helpHint))
 
 	return b.String()
 }

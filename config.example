@@ -1,0 +1,98 @@
+# Bontree configuration file
+# Place this at ~/.config/bontree/config
+#
+# The syntax is "key = value". The whitespace around the equals doesn't matter.
+# Comments start with `#` and are only valid on their own line.
+# Blank lines are ignored.
+#
+# When you specify ANY keybind line, all default keybindings are cleared
+# and only your specified bindings will be active. This gives you full
+# control over every keybinding.
+
+# --- General settings ---
+
+# Show hidden files (dotfiles) by default.
+# show-hidden = false
+
+# --- Keybindings ---
+#
+# Keybinds use the format: keybind = <key>=<action>
+#
+# To remove a specific binding: keybind = <key>=unbind
+#
+# Available key names:
+#   Letters:    a, b, c, ... z, A, B, ... Z
+#   Symbols:    /, ?, ., space ( ), etc.
+#   Arrows:     up, down, left, right
+#   Special:    enter, esc, backspace, tab
+#   Modifiers:  ctrl+c, ctrl+d, ctrl+f, ctrl+u, ctrl+_
+#
+# Available actions:
+#   quit              - Exit bontree
+#   move_down         - Move cursor down
+#   move_up           - Move cursor up
+#   go_top            - Jump to first item
+#   go_bottom         - Jump to last item
+#   half_page_down    - Scroll half page down
+#   half_page_up      - Scroll half page up
+#   expand            - Expand directory (or next match in filter mode)
+#   collapse          - Collapse directory / go to parent (or prev match in filter)
+#   toggle            - Toggle directory open/close
+#   copy_path         - Copy relative path to clipboard
+#   expand_all        - Expand all directories
+#   collapse_all      - Collapse all directories
+#   toggle_hidden     - Toggle hidden file visibility
+#   search            - Start fuzzy search (tree mode)
+#   flat_search       - Start flat file search
+#   help              - Toggle help screen
+#   clear_filter      - Clear active search filter
+#
+# Search mode actions (active while the search input is open):
+#   search_confirm    - Accept search and enter filter mode
+#   search_cancel     - Cancel search
+#   search_backspace  - Delete last character
+#   search_next_match - Jump to next match
+#   search_prev_match - Jump to previous match
+
+# --- Default keybindings ---
+# Below are the defaults. Uncomment and modify to customise.
+
+# keybind = q=quit
+# keybind = ctrl+c=quit
+# keybind = j=move_down
+# keybind = down=move_down
+# keybind = k=move_up
+# keybind = up=move_up
+# keybind = g=go_top
+# keybind = G=go_bottom
+# keybind = ctrl+d=half_page_down
+# keybind = ctrl+u=half_page_up
+# keybind = l=expand
+# keybind = right=expand
+# keybind = h=collapse
+# keybind = left=collapse
+# keybind = enter=toggle
+# keybind =  =toggle
+# keybind = c=copy_path
+# keybind = E=expand_all
+# keybind = W=collapse_all
+# keybind = .=toggle_hidden
+# keybind = /=search
+# keybind = ctrl+f=flat_search
+# keybind = ctrl+_=flat_search
+# keybind = ?=help
+# keybind = esc=clear_filter
+
+# --- Example: Vim-free arrow-key layout ---
+# keybind = up=move_up
+# keybind = down=move_down
+# keybind = left=collapse
+# keybind = right=expand
+# keybind = enter=toggle
+# keybind = q=quit
+# keybind = ctrl+c=quit
+# keybind = /=search
+# keybind = ctrl+f=flat_search
+# keybind = esc=clear_filter
+# keybind = ?=help
+# keybind = c=copy_path

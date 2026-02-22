@@ -6,6 +6,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/alasdairmonk/bontree/config"
 	"github.com/alasdairmonk/bontree/tree"
 	"github.com/atotto/clipboard"
 	tea "github.com/charmbracelet/bubbletea"
@@ -86,8 +87,12 @@ func (m Model) updateMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) updateSearchMode(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	switch msg.String() {
-	case "esc":
+	key := msg.String()
+	action := m.cfg.ActionFor(key)
+
+	// Search mode has its own action set plus hardcoded essentials
+	switch {
+	case key == "esc" || action == config.ActionSearchCancel:
 		if m.searchQuery == "" {
 			// Empty search — go straight back to normal mode
 			m.searching = false
@@ -107,7 +112,7 @@ func (m Model) updateSearchMode(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.clampCursor()
 		}
 
-	case "enter":
+	case key == "enter" || action == config.ActionSearchConfirm:
 		m.searching = false
 		m.filtered = true
 		if m.searchNodes != nil {
@@ -115,26 +120,26 @@ func (m Model) updateSearchMode(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 		m.clampCursor()
 
-	case "backspace":
+	case key == "backspace" || action == config.ActionSearchBackspace:
 		if len(m.searchQuery) > 0 {
 			_, size := utf8.DecodeLastRuneInString(m.searchQuery)
 			m.searchQuery = m.searchQuery[:len(m.searchQuery)-size]
 			m.applySearchFilter()
 		}
 
-	case "ctrl+c":
+	case action == config.ActionQuit:
 		return m, tea.Quit
 
-	case "down":
+	case action == config.ActionMoveDown:
 		m.moveCursor(1)
 
-	case "up":
+	case action == config.ActionMoveUp:
 		m.moveCursor(-1)
 
-	case "right":
+	case action == config.ActionSearchNextMatch:
 		m.jumpToMatch(1)
 
-	case "left":
+	case action == config.ActionSearchPrevMatch:
 		m.jumpToMatch(-1)
 
 	default:
@@ -148,8 +153,10 @@ func (m Model) updateSearchMode(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) updateNormalMode(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	switch msg.String() {
-	case "esc":
+	action := m.cfg.ActionFor(msg.String())
+
+	switch action {
+	case config.ActionClearFilter:
 		if m.filtered {
 			m.filtered = false
 			m.flatSearch = false
@@ -160,30 +167,30 @@ func (m Model) updateNormalMode(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.restoreExpandedState()
 		}
 
-	case "q", "ctrl+c":
+	case config.ActionQuit:
 		return m, tea.Quit
 
-	case "j", "down":
+	case config.ActionMoveDown:
 		m.moveCursor(1)
 
-	case "k", "up":
+	case config.ActionMoveUp:
 		m.moveCursor(-1)
 
-	case "g":
+	case config.ActionGoTop:
 		m.cursor = 0
 		m.scrollOff = 0
 
-	case "G":
+	case config.ActionGoBottom:
 		m.cursor = len(m.flatNodes) - 1
 		m.ensureVisible()
 
-	case "ctrl+d":
+	case config.ActionHalfPageDown:
 		m.moveCursor(m.viewportHeight() / 2)
 
-	case "ctrl+u":
+	case config.ActionHalfPageUp:
 		m.moveCursor(-m.viewportHeight() / 2)
 
-	case "l", "right":
+	case config.ActionExpand:
 		if m.filtered {
 			m.jumpToMatch(1)
 		} else {
@@ -194,7 +201,7 @@ func (m Model) updateNormalMode(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			}
 		}
 
-	case "h", "left":
+	case config.ActionCollapse:
 		if m.filtered {
 			m.jumpToMatch(-1)
 		} else {
@@ -213,14 +220,14 @@ func (m Model) updateNormalMode(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			}
 		}
 
-	case "enter", " ":
+	case config.ActionToggle:
 		node := m.flatNodes[m.cursor]
 		if node.IsDir {
 			node.Toggle()
 			m.refreshFlatNodes()
 		}
 
-	case "c":
+	case config.ActionCopyPath:
 		node := m.flatNodes[m.cursor]
 		relPath := strings.TrimPrefix(node.Path, "./")
 		if err := clipboard.WriteAll(relPath); err != nil {
@@ -228,18 +235,18 @@ func (m Model) updateNormalMode(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 		return m, flash(&m, fmt.Sprintf("✓ Copied path: %s", relPath))
 
-	case "E":
+	case config.ActionExpandAll:
 		m.setExpandAll(m.root, true)
 		m.refreshFlatNodes()
 
-	case "W":
+	case config.ActionCollapseAll:
 		m.setExpandAll(m.root, false)
 		m.root.Expanded = true
 		m.refreshFlatNodes()
 		m.cursor = 0
 		m.scrollOff = 0
 
-	case ".":
+	case config.ActionToggleHidden:
 		m.showHidden = !m.showHidden
 		tree.ShowHidden = m.showHidden
 		if root, err := tree.BuildTree(m.rootPath); err == nil {
@@ -248,13 +255,13 @@ func (m Model) updateNormalMode(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.ensureVisible()
 		}
 
-	case "/":
+	case config.ActionSearch:
 		m.startSearch(false)
 
-	case "ctrl+_", "ctrl+f":
+	case config.ActionFlatSearch:
 		m.startSearch(true)
 
-	case "?":
+	case config.ActionHelp:
 		m.showHelp = !m.showHelp
 	}
 
