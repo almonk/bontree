@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/alasdairmonk/altree/ui"
+	"github.com/alasdairmonk/bontree/ui"
 	tea "github.com/charmbracelet/bubbletea"
 )
 

@@ -137,7 +137,7 @@ func (m Model) renderNode(node *tree.Node, selected bool, maxWidth int) string {
 	}
 
 	if selected {
-		treeLineSelectedStyle := treeLineStyle.Background(lipgloss.Color(colorSelection))
+		treeLineSelectedStyle := treeLineStyle.Background(colorSelection)
 		var parts []string
 		parts = append(parts, selectedStyle.Render(" "))
 		if prefix != "" {
@@ -180,17 +180,13 @@ func (m Model) gitNodeStyles(node *tree.Node) (lipgloss.Style, lipgloss.Style) {
 		if status, ok := m.gitFiles[relPath]; ok {
 			switch status {
 			case gitModified:
-				color := lipgloss.Color(colorBlue)
-				return lipgloss.NewStyle().Foreground(color), lipgloss.NewStyle().Foreground(color)
+				return lipgloss.NewStyle().Foreground(colorBlue), lipgloss.NewStyle().Foreground(colorBlue)
 			case gitAdded, gitUntracked:
-				color := lipgloss.Color(colorGreen)
-				return lipgloss.NewStyle().Foreground(color), lipgloss.NewStyle().Foreground(color)
+				return lipgloss.NewStyle().Foreground(colorGreen), lipgloss.NewStyle().Foreground(colorGreen)
 			case gitDeleted:
-				color := lipgloss.Color(colorRed)
-				return lipgloss.NewStyle().Foreground(color), lipgloss.NewStyle().Foreground(color)
+				return lipgloss.NewStyle().Foreground(colorRed), lipgloss.NewStyle().Foreground(colorRed)
 			case gitIgnored:
-				color := lipgloss.Color(colorGutter)
-				return lipgloss.NewStyle().Foreground(color), lipgloss.NewStyle().Foreground(color)
+				return lipgloss.NewStyle().Foreground(colorGutter), lipgloss.NewStyle().Foreground(colorGutter)
 			}
 		}
 	}
@@ -323,14 +319,14 @@ func (m Model) helpView() string {
 	}
 
 	keyStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color(colorPurple)).
+		Foreground(colorPurple).
 		Bold(true).
 		Width(16).
 		Align(lipgloss.Left).
 		PaddingLeft(2)
 
 	descStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color(colorFgDim))
+		Foreground(colorFgDim)
 
 	for _, bind := range bindings {
 		b.WriteString(keyStyle.Render(bind.key))
@@ -339,7 +335,7 @@ func (m Model) helpView() string {
 	}
 
 	b.WriteString("\n")
-	b.WriteString(lipgloss.NewStyle().Foreground(lipgloss.Color(colorComment)).PaddingLeft(2).Render("Press ? to return"))
+	b.WriteString(lipgloss.NewStyle().Foreground(colorComment).PaddingLeft(2).Render("Press ? to return"))
 
 	return b.String()
 }

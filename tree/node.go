@@ -2,6 +2,7 @@ package tree
 
 import (
 	"os"
+	"os/exec"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -20,7 +21,12 @@ type Node struct {
 	Loaded   bool // whether children have been loaded
 }
 
-// Non-dot dirs to always skip unless ShowHidden is on
+// Always hidden — never shown regardless of ShowHidden
+var alwaysHidden = map[string]bool{
+	".git": true,
+}
+
+// Non-dot dirs to skip unless ShowHidden is on
 var defaultHidden = map[string]bool{
 	"node_modules": true,
 	"__pycache__":  true,
@@ -28,6 +34,35 @@ var defaultHidden = map[string]bool{
 
 // ShowHidden controls whether hidden/ignored files are displayed
 var ShowHidden = true
+
+// RespectGitignore controls whether .gitignored files are hidden
+var RespectGitignore = true
+
+// cachedIgnored is the set of gitignored paths (relative to repo root)
+var cachedIgnored map[string]bool
+
+// RefreshGitIgnored rebuilds the gitignore cache for the given root path.
+func RefreshGitIgnored(rootPath string) {
+	absRoot, err := filepath.Abs(rootPath)
+	if err != nil {
+		cachedIgnored = nil
+		return
+	}
+	cmd := exec.Command("git", "-C", absRoot, "ls-files", "--others", "--ignored", "--exclude-standard", "--directory")
+	out, err := cmd.Output()
+	if err != nil {
+		cachedIgnored = nil
+		return
+	}
+	ignored := make(map[string]bool)
+	for _, line := range strings.Split(strings.TrimSpace(string(out)), "\n") {
+		line = strings.TrimSuffix(strings.TrimSpace(line), "/")
+		if line != "" {
+			ignored[line] = true
+		}
+	}
+	cachedIgnored = ignored
+}
 
 // BuildTree creates a tree from a root path (only loads top level initially)
 func BuildTree(rootPath string) (*Node, error) {
@@ -75,8 +110,19 @@ func loadChildren(node *Node) error {
 	for _, entry := range entries {
 		name := entry.Name()
 
+		if alwaysHidden[name] {
+			continue
+		}
+
 		// Skip dot files and default hidden dirs unless ShowHidden is on
 		if !ShowHidden && (strings.HasPrefix(name, ".") || defaultHidden[name]) {
+			continue
+		}
+
+		// Skip gitignored files
+		relPath := filepath.Join(node.Path, name)
+		relPath = strings.TrimPrefix(relPath, "./")
+		if RespectGitignore && cachedIgnored != nil && cachedIgnored[relPath] {
 			continue
 		}
 

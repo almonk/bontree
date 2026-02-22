@@ -1,4 +1,4 @@
-BINARY = altree
+BINARY = bontree
 INSTALL_DIR = /usr/local/bin
 
 .PHONY: build install clean

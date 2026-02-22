@@ -2,76 +2,84 @@ package ui
 
 import "github.com/charmbracelet/lipgloss"
 
-// Color palette
-const (
-	colorBg        = "#1a1b26"
-	colorBlue      = "#7aa2f7"
-	colorFg        = "#c0caf5"
-	colorFgDim     = "#a9b1d6"
-	colorComment   = "#565f89"
-	colorGutter    = "#3b4261"
-	colorGreen     = "#9ece6a"
-	colorYellow    = "#e0af68"
-	colorOrange    = "#ff9e64"
-	colorPurple    = "#bb9af7"
-	colorRed       = "#f7768e"
-	colorCyan      = "#7dcfff"
-	colorSelection = "#283457"
+// Color palette using ANSI colors that adapt to the terminal's color scheme.
+// Semantic colors (blue, green, red, etc.) use ANSI indices 0-15,
+// which are customized by the user's terminal theme.
+// Colors that need light/dark awareness use AdaptiveColor.
+var (
+	// Semantic ANSI colors — themed by the terminal
+	colorBlue   lipgloss.TerminalColor = lipgloss.Color("12")
+	colorGreen  lipgloss.TerminalColor = lipgloss.Color("10")
+	colorRed    lipgloss.TerminalColor = lipgloss.Color("9")
+	colorYellow lipgloss.TerminalColor = lipgloss.Color("11")
+	colorPurple lipgloss.TerminalColor = lipgloss.Color("13")
+	colorCyan   lipgloss.TerminalColor = lipgloss.Color("14")
+	colorOrange lipgloss.TerminalColor = lipgloss.Color("208") // 256-color; no ANSI equivalent
+
+	// Adaptive text colors
+	colorFg      lipgloss.TerminalColor = lipgloss.AdaptiveColor{Light: "0", Dark: "15"}
+	colorFgDim   lipgloss.TerminalColor = lipgloss.AdaptiveColor{Light: "8", Dark: "7"}
+	colorComment lipgloss.TerminalColor = lipgloss.Color("8")
+	colorGutter  lipgloss.TerminalColor = lipgloss.AdaptiveColor{Light: "248", Dark: "239"}
+
+	// Adaptive background colors
+	colorBg        lipgloss.TerminalColor = lipgloss.AdaptiveColor{Light: "254", Dark: "235"}
+	colorSelection lipgloss.TerminalColor = lipgloss.AdaptiveColor{Light: "253", Dark: "237"}
 )
 
 // Styles
 var (
 	titleStyle = lipgloss.NewStyle().
 			Bold(true).
-			Foreground(lipgloss.Color(colorBlue)).
+			Foreground(colorBlue).
 			PaddingLeft(1)
 
 	selectedStyle = lipgloss.NewStyle().
-			Background(lipgloss.Color(colorSelection)).
-			Foreground(lipgloss.Color(colorFg)).
+			Background(colorSelection).
+			Foreground(colorFg).
 			Bold(true)
 
 	dirStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color(colorBlue)).
+			Foreground(colorBlue).
 			Bold(true)
 
 	fileStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color(colorFgDim))
+			Foreground(colorFgDim)
 
 	treeLineStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color(colorGutter))
+			Foreground(colorGutter)
 
 	iconDirStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color(colorBlue))
+			Foreground(colorBlue)
 
 	iconFileStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color(colorFgDim))
+			Foreground(colorFgDim)
 
 	matchHighlightStyle = lipgloss.NewStyle().
-				Foreground(lipgloss.Color(colorOrange)).
+				Foreground(colorOrange).
 				Bold(true)
 
 	matchHighlightSelectedStyle = lipgloss.NewStyle().
-					Background(lipgloss.Color(colorSelection)).
-					Foreground(lipgloss.Color(colorOrange)).
+					Background(colorSelection).
+					Foreground(colorOrange).
 					Bold(true)
 
 	flatPathStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color(colorComment))
+			Foreground(colorComment)
 
 	flatPathSelectedStyle = lipgloss.NewStyle().
-				Background(lipgloss.Color(colorSelection)).
-				Foreground(lipgloss.Color(colorComment))
+				Background(colorSelection).
+				Foreground(colorComment)
 
 	// Status bar base style — all status styles inherit this background
 	statusBase = lipgloss.NewStyle().
-			Background(lipgloss.Color(colorBg))
+			Background(colorBg)
 
-	statusPathStyle     = statusBase.Foreground(lipgloss.Color(colorFgDim)).PaddingLeft(1).PaddingRight(1)
-	statusBranchStyle   = statusBase.Foreground(lipgloss.Color(colorPurple)).Bold(true)
-	statusFlashStyle = statusBase.Foreground(lipgloss.Color(colorGreen)).Bold(true).PaddingLeft(1)
-	statusHelpStyle  = statusBase.Foreground(lipgloss.Color(colorGutter))
+	statusPathStyle   = statusBase.Foreground(colorFgDim).PaddingLeft(1).PaddingRight(1)
+	statusBranchStyle = statusBase.Foreground(colorPurple).Bold(true)
+	statusFlashStyle  = statusBase.Foreground(colorGreen).Bold(true).PaddingLeft(1)
+	statusHelpStyle   = statusBase.Foreground(colorGutter)
 
-	searchInputStyle  = statusBase.Foreground(lipgloss.Color(colorFg)).PaddingLeft(1)
-	searchPromptStyle = statusBase.Foreground(lipgloss.Color(colorBlue)).Bold(true).PaddingLeft(1)
+	searchInputStyle  = statusBase.Foreground(colorFg).PaddingLeft(1)
+	searchPromptStyle = statusBase.Foreground(colorBlue).Bold(true).PaddingLeft(1)
 )
