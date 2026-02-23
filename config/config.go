@@ -30,6 +30,7 @@ const (
 	ActionFlatSearch   Action = "flat_search"
 	ActionHelp         Action = "help"
 	ActionClearFilter  Action = "clear_filter"
+	ActionOpenEditor   Action = "open_editor"
 
 	// Search mode actions
 	ActionSearchConfirm   Action = "search_confirm"
@@ -228,7 +229,7 @@ func isValidAction(a Action) bool {
 		ActionHalfPageDown, ActionHalfPageUp, ActionExpand, ActionCollapse,
 		ActionToggle, ActionCopyPath, ActionExpandAll, ActionCollapseAll,
 		ActionToggleHidden, ActionSearch, ActionFlatSearch, ActionHelp,
-		ActionClearFilter, ActionSearchConfirm, ActionSearchCancel,
+		ActionClearFilter, ActionOpenEditor, ActionSearchConfirm, ActionSearchCancel,
 		ActionSearchBackspace, ActionSearchNextMatch, ActionSearchPrevMatch:
 		return true
 	}

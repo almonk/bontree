@@ -436,6 +436,7 @@ func (m Model) helpView() string {
 		{config.ActionCollapse, "Collapse directory / go to parent"},
 		{config.ActionToggle, "Toggle directory open/close"},
 		{config.ActionCopyPath, "Copy relative path to clipboard"},
+		{config.ActionOpenEditor, "Open file in $EDITOR"},
 		{config.ActionExpandAll, "Expand all"},
 		{config.ActionCollapseAll, "Collapse all"},
 		{config.ActionSearch, "Fuzzy search (tree)"},

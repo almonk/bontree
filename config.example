@@ -56,6 +56,7 @@
 #   flat_search       - Start flat file search
 #   help              - Toggle help screen
 #   clear_filter      - Clear active search filter
+#   open_editor       - Open selected file in $EDITOR (not bound by default)
 #
 # Search mode actions (active while the search input is open):
 #   search_confirm    - Accept search and enter filter mode

@@ -2,6 +2,8 @@ package ui
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -11,6 +13,9 @@ import (
 	"github.com/atotto/clipboard"
 	tea "github.com/charmbracelet/bubbletea"
 )
+
+// editorFinishedMsg is sent when the external editor process exits.
+type editorFinishedMsg struct{ err error }
 
 // flash sets a temporary flash message that auto-clears.
 func flash(m *Model, msg string) tea.Cmd {
@@ -44,6 +49,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.MouseMsg:
 		return m.updateMouse(msg)
+
+	case editorFinishedMsg:
+		// Editor exited — refresh the tree in case files changed
+		m.refreshTree()
+		if msg.err != nil {
+			return m, flash(&m, fmt.Sprintf("✗ Editor error: %s", msg.err))
+		}
+		return m, nil
 
 	case tea.KeyMsg:
 		if m.searching {
@@ -264,6 +277,20 @@ func (m Model) updateNormalMode(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 	case config.ActionHelp:
 		m.showHelp = !m.showHelp
+
+	case config.ActionOpenEditor:
+		node := m.flatNodes[m.cursor]
+		if node.IsDir {
+			return m, flash(&m, "✗ Cannot edit a directory")
+		}
+		editor := os.Getenv("EDITOR")
+		if editor == "" {
+			return m, flash(&m, "✗ $EDITOR is not set")
+		}
+		c := exec.Command(editor, node.AbsPath)
+		return m, tea.ExecProcess(c, func(err error) tea.Msg {
+			return editorFinishedMsg{err}
+		})
 	}
 
 	return m, nil
