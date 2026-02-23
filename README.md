@@ -18,7 +18,8 @@ https://github.com/user-attachments/assets/0e987772-826c-4f30-bd7f-d44cbf69547a
 - **Configurable keybindings** — remap every key or strip down to a minimal layout
 - **Clipboard** — copy relative file paths with `c`
 - **Hidden files** — toggle visibility with `.`
-- **Mouse support** — scroll, click to select, double-click to toggle directories
+- **Open in `$EDITOR`** — open files directly in your editor, then return to bontree (opt-in keybinding)
+- **Mouse support** — scroll, click to select, double-click to toggle directories (or open in `$EDITOR` if bound)
 
 ## Install
 
@@ -113,8 +114,20 @@ Letters and symbols are used as-is (`a`, `G`, `/`, `?`, `.`). Special keys: `up`
 | `flat_search` | Start flat file search |
 | `help` | Toggle help screen |
 | `clear_filter` | Clear active search filter |
+| `open_editor` | Open selected file in `$EDITOR` (not bound by default) |
 
 Search mode also supports: `search_confirm`, `search_cancel`, `search_backspace`, `search_next_match`, `search_prev_match`.
+
+#### Open in `$EDITOR`
+
+The `open_editor` action opens the selected file in your `$EDITOR` (e.g. `vim`, `nvim`, `nano`), suspending bontree while the editor runs. When you quit the editor, you're returned to bontree with the tree refreshed. On directories it falls back to toggling expand/collapse. Double-clicking a file will also use whatever action is bound to `enter`.
+
+This action is **not bound by default** — to enable it, add a keybinding in your config:
+
+```
+# ~/.config/bontree/config
+keybind = enter=open_editor
+```
 
 ### Settings
 

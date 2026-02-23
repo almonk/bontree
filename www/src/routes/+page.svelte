@@ -98,6 +98,7 @@
           <li>Tree navigation with keyboard + mouse</li>
           <li>Hierarchy-aware search (`/`) and flat search (`Ctrl+f`)</li>
           <li>Git status coloring to quickly scan changes</li>
+          <li>Open files in <code>$EDITOR</code> and return to bontree</li>
           <li>Configurable keybindings and theme support</li>
         </ul>
         <p class="readme-usage">
@@ -139,6 +140,7 @@
         <li>Tree navigation with keyboard + mouse</li>
         <li>Hierarchy-aware search (`/`) and flat search (`Ctrl+f`)</li>
         <li>Git status coloring to quickly scan changes</li>
+        <li>Open files in <code>$EDITOR</code> and return to bontree</li>
         <li>Configurable keybindings and theme support</li>
       </ul>
       <p class="readme-usage">
