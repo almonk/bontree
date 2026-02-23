@@ -281,7 +281,9 @@ func (m Model) updateNormalMode(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case config.ActionOpenEditor:
 		node := m.flatNodes[m.cursor]
 		if node.IsDir {
-			return m, flash(&m, "✗ Cannot edit a directory")
+			node.Toggle()
+			m.refreshFlatNodes()
+			return m, nil
 		}
 		editor := os.Getenv("EDITOR")
 		if editor == "" {
