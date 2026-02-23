@@ -85,19 +85,17 @@ func (m Model) updateMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 		m.lastClickTime = now
 		m.lastClickRow = row
 
+		m.cursor = row
+		m.ensureVisible()
+
 		if doubleClick {
 			node := m.flatNodes[row]
 			if node.IsDir {
 				node.Toggle()
 				m.refreshFlatNodes()
 			} else if action := m.cfg.ActionFor("enter"); action != "" {
-				m.cursor = row
-				m.ensureVisible()
 				return m.dispatchAction(action)
 			}
-		} else {
-			m.cursor = row
-			m.ensureVisible()
 		}
 	}
 	return m, nil
