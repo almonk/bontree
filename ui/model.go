@@ -1,6 +1,9 @@
 package ui
 
 import (
+	"fmt"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/almonk/bontree/config"
@@ -10,15 +13,15 @@ import (
 
 // Model is the Bubble Tea model
 type Model struct {
-	root      *tree.Node
-	flatNodes []*tree.Node
-	cursor    int
-	width     int
-	height    int
-	rootPath  string
-	flashMsg  string
-	showHelp  bool
-	scrollOff int
+	root       *tree.Node
+	flatNodes  []*tree.Node
+	cursor     int
+	width      int
+	height     int
+	rootPath   string
+	flashMsg   string
+	showHelp   bool
+	scrollOff  int
 	gitBranch  string
 	gitFiles   map[string]gitFileStatus // relative path -> status
 	showHidden bool
@@ -45,6 +48,11 @@ type Model struct {
 
 // New creates a new Model with the given config. If cfg is nil, defaults are used.
 func New(rootPath string, cfg *config.Config) (Model, error) {
+	return NewWithFocus(rootPath, "", cfg)
+}
+
+// NewWithFocus creates a new Model and optionally reveals/focuses focusPath.
+func NewWithFocus(rootPath, focusPath string, cfg *config.Config) (Model, error) {
 	if cfg == nil {
 		cfg = config.DefaultConfig()
 	}
@@ -56,13 +64,95 @@ func New(rootPath string, cfg *config.Config) (Model, error) {
 		return Model{}, err
 	}
 
-	return Model{
+	m := Model{
 		root:       root,
 		flatNodes:  flattenTree(root),
 		rootPath:   rootPath,
 		showHidden: cfg.ShowHidden,
 		cfg:        cfg,
-	}, nil
+	}
+
+	if err := m.focusByPath(focusPath); err != nil {
+		return Model{}, err
+	}
+
+	return m, nil
+}
+
+// focusByPath expands ancestor directories and moves the cursor to the target path.
+// targetPath may be absolute or relative to rootPath.
+func (m *Model) focusByPath(targetPath string) error {
+	if strings.TrimSpace(targetPath) == "" {
+		return nil
+	}
+
+	rootAbs, err := filepath.Abs(m.rootPath)
+	if err != nil {
+		return err
+	}
+	targetAbs, err := filepath.Abs(targetPath)
+	if err != nil {
+		return err
+	}
+
+	relPath, err := filepath.Rel(rootAbs, targetAbs)
+	if err != nil {
+		return err
+	}
+	relPath = filepath.ToSlash(relPath)
+	if relPath == "." {
+		m.cursor = 0
+		m.ensureVisible()
+		return nil
+	}
+	if relPath == ".." || strings.HasPrefix(relPath, "../") {
+		return fmt.Errorf("focus path %q is outside root %q", targetPath, m.rootPath)
+	}
+
+	parts := strings.Split(relPath, "/")
+	current := m.root
+	for i, part := range parts {
+		if part == "" || part == "." {
+			continue
+		}
+
+		if !current.Loaded {
+			if err := current.Expand(); err != nil {
+				return err
+			}
+		}
+
+		var next *tree.Node
+		for _, child := range current.Children {
+			if child.Name == part {
+				next = child
+				break
+			}
+		}
+		if next == nil {
+			return fmt.Errorf("focus path %q not found", targetPath)
+		}
+
+		if i < len(parts)-1 {
+			if !next.IsDir {
+				return fmt.Errorf("focus path %q is invalid", targetPath)
+			}
+			if err := next.Expand(); err != nil {
+				return err
+			}
+		}
+		current = next
+	}
+
+	m.refreshFlatNodes()
+	for i, n := range m.flatNodes {
+		if n == current {
+			m.cursor = i
+			break
+		}
+	}
+	m.ensureVisible()
+	return nil
 }
 
 func (m Model) Init() tea.Cmd {
@@ -174,6 +264,9 @@ func (m *Model) viewportHeight() int {
 }
 
 func (m *Model) ensureVisible() {
+	if m.height <= 0 {
+		return
+	}
 	viewH := m.viewportHeight()
 	if m.cursor < m.scrollOff {
 		m.scrollOff = m.cursor
