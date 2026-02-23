@@ -90,6 +90,10 @@ func (m Model) updateMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 			if node.IsDir {
 				node.Toggle()
 				m.refreshFlatNodes()
+			} else if m.cfg.DoubleClickFile != "" {
+				m.cursor = row
+				m.ensureVisible()
+				return m.dispatchAction(m.cfg.DoubleClickFile)
 			}
 		} else {
 			m.cursor = row
@@ -163,6 +167,28 @@ func (m Model) updateSearchMode(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.jumpToMatch(-1)
 	}
 
+	return m, nil
+}
+
+// dispatchAction executes a single action. Used by updateNormalMode and mouse handlers.
+func (m Model) dispatchAction(action config.Action) (tea.Model, tea.Cmd) {
+	switch action {
+	case config.ActionOpenEditor:
+		node := m.flatNodes[m.cursor]
+		if node.IsDir {
+			node.Toggle()
+			m.refreshFlatNodes()
+			return m, nil
+		}
+		editor := os.Getenv("EDITOR")
+		if editor == "" {
+			return m, flash(&m, "✗ $EDITOR is not set")
+		}
+		c := exec.Command(editor, node.AbsPath)
+		return m, tea.ExecProcess(c, func(err error) tea.Msg {
+			return editorFinishedMsg{err}
+		})
+	}
 	return m, nil
 }
 
@@ -279,20 +305,7 @@ func (m Model) updateNormalMode(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.showHelp = !m.showHelp
 
 	case config.ActionOpenEditor:
-		node := m.flatNodes[m.cursor]
-		if node.IsDir {
-			node.Toggle()
-			m.refreshFlatNodes()
-			return m, nil
-		}
-		editor := os.Getenv("EDITOR")
-		if editor == "" {
-			return m, flash(&m, "✗ $EDITOR is not set")
-		}
-		c := exec.Command(editor, node.AbsPath)
-		return m, tea.ExecProcess(c, func(err error) tea.Msg {
-			return editorFinishedMsg{err}
-		})
+		return m.dispatchAction(action)
 	}
 
 	return m, nil
