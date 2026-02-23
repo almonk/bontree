@@ -1,3 +1,5 @@
+//go:build !js
+
 package ui
 
 import (
@@ -9,19 +11,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-// gitFileStatus represents the git state of a file
-type gitFileStatus int
-
-const (
-	gitUnchanged  gitFileStatus = iota
-	gitModified                         // working tree modified
-	gitAdded                            // staged / new tracked file
-	gitDeleted                          // deleted
-	gitUntracked                        // untracked (?)
-	gitIgnored                          // ignored (!)
-)
-
-type clearFlashMsg struct{}
 type gitRefreshMsg struct{}
 type gitInfoMsg struct {
 	branch     string

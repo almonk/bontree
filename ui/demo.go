@@ -20,10 +20,18 @@ func NewDemo(root *tree.Node, cfg *config.Config) Model {
 }
 
 // SetGitInfo sets the git branch and file status for demo display.
-func (m *Model) SetGitInfo(branch string, files map[string]gitFileStatus) {
+func (m *Model) SetGitInfo(branch string, files map[string]GitFileStatus) {
 	m.gitBranch = branch
 	m.gitFiles = files
 }
+
+// SetFlash sets a flash message (caller is responsible for clearing it later).
+func (m *Model) SetFlash(msg string) {
+	m.flashMsg = msg
+}
+
+// GitFileStatus is the exported type for git file status constants.
+type GitFileStatus = gitFileStatus
 
 // Exported git status constants for demo use.
 const (

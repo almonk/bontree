@@ -5,10 +5,11 @@ import (
 
 	"github.com/almonk/bontree/config"
 	"github.com/almonk/bontree/tree"
-	tea "github.com/charmbracelet/bubbletea"
 )
 
-// Model is the Bubble Tea model
+// Model is the core model for the tree UI.
+// In the terminal TUI it implements tea.Model (via tea.go).
+// In WASM it is used directly via HandleKey/View.
 type Model struct {
 	root      *tree.Node
 	flatNodes []*tree.Node
@@ -63,10 +64,6 @@ func New(rootPath string, cfg *config.Config) (Model, error) {
 		showHidden: cfg.ShowHidden,
 		cfg:        cfg,
 	}, nil
-}
-
-func (m Model) Init() tea.Cmd {
-	return tea.Batch(fetchGitInfo(m.rootPath), gitRefreshTick())
 }
 
 // --- Helpers ---
@@ -181,6 +178,51 @@ func (m *Model) ensureVisible() {
 	if m.cursor >= m.scrollOff+viewH {
 		m.scrollOff = m.cursor - viewH + 1
 	}
+}
+
+// --- Public accessors for WASM/demo use ---
+
+// SetSize updates the terminal dimensions.
+func (m *Model) SetSize(w, h int) {
+	m.width = w
+	m.height = h
+}
+
+// ClearFlash clears the flash message.
+func (m *Model) ClearFlash() {
+	m.flashMsg = ""
+}
+
+// HasFlash returns true if a flash message is currently displayed.
+func (m *Model) HasFlash() bool {
+	return m.flashMsg != ""
+}
+
+// HandleClick processes a mouse click at the given row (0-indexed from viewport top).
+func (m *Model) HandleClick(row int, doubleClick bool) {
+	if m.showHelp {
+		m.showHelp = false
+		return
+	}
+	target := row + m.scrollOff
+	if target < 0 || target >= len(m.flatNodes) {
+		return
+	}
+	if doubleClick {
+		node := m.flatNodes[target]
+		if node.IsDir {
+			node.Toggle()
+			m.refreshFlatNodes()
+		}
+	} else {
+		m.cursor = target
+		m.ensureVisible()
+	}
+}
+
+// HandleScroll processes a scroll event (dir: +1 = down, -1 = up).
+func (m *Model) HandleScroll(dir int) {
+	m.moveCursor(dir * 3)
 }
 
 // --- Utility ---

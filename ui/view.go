@@ -227,7 +227,15 @@ func (m Model) renderNode(node *tree.Node, selected bool, maxWidth int) string {
 		if plainLen := lipgloss.Width(strings.Join(parts, "")); plainLen < maxWidth {
 			parts = append(parts, selectedStyle.Render(strings.Repeat(" ", maxWidth-plainLen)))
 		}
-		return strings.Join(parts, "")
+
+		// Strip intermediate RESETs so the selection background is continuous.
+		// Each lipgloss.Render() fully specifies its style (fg+bg+bold), so
+		// removing RESETs between segments is safe — the next SGR overrides.
+		// This prevents wide Nerd Font glyphs from clipping in xterm.js.
+		line := strings.Join(parts, "")
+		line = strings.ReplaceAll(line, "\x1b[0m", "")
+		line += "\x1b[0m"
+		return line
 	}
 
 	var parts []string
