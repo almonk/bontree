@@ -12,6 +12,7 @@ import (
 	"github.com/almonk/bontree/tree"
 	"github.com/atotto/clipboard"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/google/shlex"
 )
 
 // editorFinishedMsg is sent when the external editor process exits.
@@ -181,10 +182,15 @@ func (m Model) dispatchAction(action config.Action) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		editor := os.Getenv("EDITOR")
-		if editor == "" {
+		if strings.TrimSpace(editor) == "" {
 			return m, flash(&m, "✗ $EDITOR is not set")
 		}
-		c := exec.Command(editor, node.AbsPath)
+		parts, err := shlex.Split(editor)
+		if err != nil || len(parts) == 0 {
+			return m, flash(&m, "✗ Invalid $EDITOR")
+		}
+		args := append(parts[1:], node.AbsPath)
+		c := exec.Command(parts[0], args...)
 		return m, tea.ExecProcess(c, func(err error) tea.Msg {
 			return editorFinishedMsg{err}
 		})
