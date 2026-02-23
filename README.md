@@ -37,10 +37,13 @@ make install  # installs to /usr/local/bin/bontree
 ## Usage
 
 ```bash
-bontree [path]
+bontree [path] [focus-path]
 ```
 
 Defaults to the current directory if no path is given.
+
+- If `path` is a file, bontree opens its parent directory and focuses that file.
+- `focus-path` can be absolute or relative to `path`.
 
 ## Keybindings
 
