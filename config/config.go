@@ -52,9 +52,7 @@ type Config struct {
 	// Empty string means inherit from the terminal.
 	Theme string
 
-	// DoubleClickFile is the action to perform when double-clicking a file.
-	// Empty string means no action (default).
-	DoubleClickFile Action
+
 }
 
 // DefaultConfig returns the config with all default keybindings.
@@ -178,13 +176,6 @@ func LoadFrom(path string) (*Config, error) {
 
 		case "theme":
 			cfg.Theme = value
-
-		case "double-click-file":
-			action := Action(value)
-			if !isValidAction(action) {
-				return nil, fmt.Errorf("%s:%d: unknown action %q", path, lineNum, value)
-			}
-			cfg.DoubleClickFile = action
 
 		default:
 			return nil, fmt.Errorf("%s:%d: unknown config key %q", path, lineNum, key)

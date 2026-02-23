@@ -65,12 +65,6 @@
 #   search_next_match - Jump to next match
 #   search_prev_match - Jump to previous match
 
-# --- Mouse ---
-#
-# Action to perform when double-clicking a file (not a directory).
-# Unset by default. Example: open the file in $EDITOR.
-# double-click-file = open_editor
-
 # --- Default keybindings ---
 # Below are the defaults. Uncomment and modify to customise.
 

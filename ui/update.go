@@ -90,10 +90,10 @@ func (m Model) updateMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 			if node.IsDir {
 				node.Toggle()
 				m.refreshFlatNodes()
-			} else if m.cfg.DoubleClickFile != "" {
+			} else if action := m.cfg.ActionFor("enter"); action != "" {
 				m.cursor = row
 				m.ensureVisible()
-				return m.dispatchAction(m.cfg.DoubleClickFile)
+				return m.dispatchAction(action)
 			}
 		} else {
 			m.cursor = row
