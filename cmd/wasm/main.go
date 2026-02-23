@@ -964,9 +964,18 @@ func (m *model) handleNormalKey(key string) {
 }
 
 func (m *model) handleSearchKey(key string) {
+	// In search mode, printable characters are always typed into the query —
+	// never dispatched as normal-mode actions (e.g. j/k/h/l/g/G/q).
+	// This matches the main app's updateSearchMode which checks tea.KeyRunes first.
+	if len(key) == 1 && key[0] >= 32 {
+		m.searchQuery += key
+		m.applySearchFilter()
+		return
+	}
+
 	action := m.cfg.ActionFor(key)
 	switch {
-	case key == "esc":
+	case key == "esc" || action == config.ActionSearchCancel:
 		if m.searchQuery == "" {
 			m.searching = false
 			m.filtered = false
@@ -983,33 +992,29 @@ func (m *model) handleSearchKey(key string) {
 			}
 			m.clampCursor()
 		}
-	case key == "enter":
+	case key == "enter" || action == config.ActionSearchConfirm:
 		m.searching = false
 		m.filtered = true
 		if m.searchNodes != nil {
 			m.flatNodes = m.searchNodes
 		}
 		m.clampCursor()
-	case key == "backspace":
+	case key == "backspace" || action == config.ActionSearchBackspace:
 		if len(m.searchQuery) > 0 {
 			_, size := utf8.DecodeLastRuneInString(m.searchQuery)
 			m.searchQuery = m.searchQuery[:len(m.searchQuery)-size]
 			m.applySearchFilter()
 		}
+	case action == config.ActionQuit:
+		// Allow ctrl+c to quit even in search mode
 	case action == config.ActionMoveDown || key == "down":
 		m.moveCursor(1)
 	case action == config.ActionMoveUp || key == "up":
 		m.moveCursor(-1)
-	case action == config.ActionExpand || key == "right":
+	case action == config.ActionSearchNextMatch || action == config.ActionExpand || key == "right":
 		m.jumpToMatch(1)
-	case action == config.ActionCollapse || key == "left":
+	case action == config.ActionSearchPrevMatch || action == config.ActionCollapse || key == "left":
 		m.jumpToMatch(-1)
-	default:
-		// Printable character
-		if len(key) == 1 && key[0] >= 32 {
-			m.searchQuery += key
-			m.applySearchFilter()
-		}
 	}
 }
 
