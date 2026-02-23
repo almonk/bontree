@@ -53,10 +53,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case editorFinishedMsg:
 		// Editor exited — refresh the tree in case files changed
 		m.refreshTree()
+		// Re-enable mouse tracking (ExecProcess disables it)
+		reEnableMouse := func() tea.Msg { return tea.EnableMouseAllMotion() }
 		if msg.err != nil {
-			return m, flash(&m, fmt.Sprintf("✗ Editor error: %s", msg.err))
+			return m, tea.Batch(reEnableMouse, flash(&m, fmt.Sprintf("✗ Editor error: %s", msg.err)))
 		}
-		return m, nil
+		return m, reEnableMouse
 
 	case tea.KeyMsg:
 		if m.searching {
